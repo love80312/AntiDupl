@@ -430,6 +430,66 @@ namespace AntiDupl.NET.WinForms
             UpdatePath(m_newCoreOptions.deletePath, m_deleteListBox);
         }
 
+        private void AdjustWidthToPaths()
+        {
+            int longestPathWidth = 0;
+        
+            CorePathWithSubFolder[][] pathGroups =
+            {
+                m_newCoreOptions.searchPath,
+                m_newCoreOptions.ignorePath,
+                m_newCoreOptions.validPath,
+                m_newCoreOptions.deletePath
+            };
+        
+            foreach (CorePathWithSubFolder[] paths in pathGroups)
+            {
+                if (paths == null)
+                    continue;
+        
+                foreach (CorePathWithSubFolder item in paths)
+                {
+                    if (item == null || string.IsNullOrEmpty(item.path))
+                        continue;
+        
+                    int width = TextRenderer.MeasureText(
+                        item.path, Font).Width;
+        
+                    longestPathWidth = Math.Max(
+                        longestPathWidth, width);
+                }
+            }
+        
+            var workingArea = Screen.FromControl(this).WorkingArea;
+        
+            // 保留螢幕邊界，避免視窗超出可用範圍。
+            int maxClientWidth = Math.Max(
+                FORM_WIDTH, workingArea.Width - 80);
+        
+            // 額外保留清單、核取方塊及邊界所需的空間。
+            int targetWidth = Math.Min(
+                Math.Max(FORM_WIDTH, longestPathWidth + 100),
+                maxClientWidth);
+        
+            if (ClientSize.Width != targetWidth)
+            {
+                ClientSize = new System.Drawing.Size(
+                    targetWidth, ClientSize.Height);
+        
+                // 視窗已顯示時，避免加寬後超出螢幕右側。
+                if (Visible)
+                {
+                    int maxLeft = workingArea.Right - Width;
+        
+                    if (Left > maxLeft)
+                        Left = maxLeft;
+        
+                    if (Left < workingArea.Left)
+                        Left = workingArea.Left;
+                }
+            }
+        }
+
         private void OnOkButtonClick(object sender, EventArgs e)
         {
             m_newCoreOptions.CopyTo(ref m_oldCoreOptions);
