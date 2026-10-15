@@ -1,0 +1,127 @@
+
+name: AntiDupl Personal Build
+
+on:
+  push:
+    branches:
+      - master
+      - a
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VCPKG_DEFAULT_TRIPLET: x64-windows-static
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Release, Publish]
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: ./src/AntiDupl.sln
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $version = (Get-Content -LiteralPath "src/version.txt" -Raw).Trim()
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            throw "src/version.txt is empty."
+          }
+          "content=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore $env:Solution_Name
+
+      - name: Run and cache vcpkg dependencies
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: 3b9d086009cc1c2256e9c28ad44a00036fbd9b26
+          vcpkgJsonGlob: src/vcpkg.json
+          runVcpkgInstall: false
+
+      - name: Integrate vcpkg
+        working-directory: ${{ env.VCPKG_ROOT }}
+        run: |
+          .\vcpkg.exe integrate install
+
+      - name: Build Release
+        if: matrix.configuration == 'Release'
+        run: msbuild /p:Configuration=Release /p:Platform=x64 $env:Solution_Name
+
+      - name: Build Publish
+        if: matrix.configuration == 'Publish'
+        run: msbuild $env:Solution_Name /p:Configuration=Publish /p:Platform=x64 -restore -t:Publish -p:PublishProfile="AntiDuplPublishSingleFile"
+
+      - name: Make Release package
+        if: matrix.configuration == 'Release'
+        run: |
+          cd cmd
+          .\MakeBin.cmd
+
+      - name: Make SingleFilePortable package
+        if: matrix.configuration == 'Publish'
+        run: |
+          cd cmd
+          .\MakePublish.cmd
+
+      - name: Generate correct portable SHA-256 checksums
+        if: matrix.configuration == 'Publish'
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.content }}
+        run: |
+          $publishDir = Join-Path $env:GITHUB_WORKSPACE "out\publish"
+          $base = Join-Path $publishDir "AntiDupl.NET-$($env:VERSION)"
+
+          foreach ($suffix in @("_SingleFilePortable.exe", "_SingleFilePortable.zip")) {
+            $filePath = "$base$suffix"
+
+            if (-not (Test-Path -LiteralPath $filePath)) {
+              throw "File not found: $filePath"
+            }
+
+            $hash = (Get-FileHash -LiteralPath $filePath -Algorithm SHA256).Hash
+            $hashPath = "$filePath.hash.txt"
+            "$hash  $(Split-Path -Leaf $filePath)" |
+              Set-Content -LiteralPath $hashPath -Encoding ascii
+          }
+
+      - name: Upload Release build
+        if: matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v7
+        with:
+          name: AntiDupl.NET-${{ steps.version.outputs.content }}-Release
+          path: |
+            ${{ github.workspace }}\out\bin\AntiDupl.NET-${{ steps.version.outputs.content }}.exe
+            ${{ github.workspace }}\out\bin\AntiDupl.NET-${{ steps.version.outputs.content }}.exe.hash.txt
+            ${{ github.workspace }}\out\bin\AntiDupl.NET-${{ steps.version.outputs.content }}.zip
+            ${{ github.workspace }}\out\bin\AntiDupl.NET-${{ steps.version.outputs.content }}.zip.hash.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload SingleFilePortable build
+        if: matrix.configuration == 'Publish'
+        uses: actions/upload-artifact@v7
+        with:
+          name: AntiDupl.NET-${{ steps.version.outputs.content }}-SingleFilePortable
+          path: |
+            ${{ github.workspace }}\out\publish\AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.exe
+            ${{ github.workspace }}\out\publish\AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.exe.hash.txt
+            ${{ github.workspace }}\out\publish\AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.zip
+            ${{ github.workspace }}\out\publish\AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.zip.hash.txt
+          if-no-files-found: error
+          retention-days: 30
