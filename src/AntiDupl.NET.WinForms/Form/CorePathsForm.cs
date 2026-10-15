@@ -117,6 +117,7 @@ namespace AntiDupl.NET.WinForms
             m_toolTip.ShowAlways = true;
 
             m_searchCheckedList = InitFactory.CheckedListBox.Create(OnSelectedIndexChanged, OnListBoxDoubleClick, OnItemCheck);
+            m_searchCheckedList.HorizontalScrollbar = true;
             m_searchTabPage.Controls.Add(ThemeColors.Framed(m_searchCheckedList));
 
             m_ignoreTabPage = new TabPage();
@@ -130,6 +131,7 @@ namespace AntiDupl.NET.WinForms
 
             m_ignoreListBox = InitFactory.ListBox.Create(OnSelectedIndexChanged, OnListBoxDoubleClick);
             m_ignoreListBox.Dock = DockStyle.Fill;
+            m_ignoreListBox.HorizontalScrollbar = true;
             ignoreLayout.Controls.Add(ThemeColors.Framed(m_ignoreListBox), 0, 0);
 
             TableLayoutPanel filterLayout = InitFactory.Layout.Create(2, 1);
@@ -155,6 +157,7 @@ namespace AntiDupl.NET.WinForms
             m_tabControl.Controls.Add(m_validTabPage);
 
             m_validListBox = InitFactory.ListBox.Create(OnSelectedIndexChanged, OnListBoxDoubleClick);
+            m_validListBox.HorizontalScrollbar = true;
             m_validTabPage.Controls.Add(ThemeColors.Framed(m_validListBox));
 
             m_deleteTabPage = new TabPage();
@@ -162,6 +165,7 @@ namespace AntiDupl.NET.WinForms
             m_tabControl.Controls.Add(m_deleteTabPage);
 
             m_deleteListBox = InitFactory.ListBox.Create(OnSelectedIndexChanged, OnListBoxDoubleClick);
+            m_deleteListBox.HorizontalScrollbar = true;
             m_deleteTabPage.Controls.Add(ThemeColors.Framed(m_deleteListBox));
 
             TableLayoutPanel pathButtonsTableLayoutPanel = InitFactory.Layout.Create(4, 1);
@@ -428,6 +432,8 @@ namespace AntiDupl.NET.WinForms
             UpdatePath(m_newCoreOptions.ignorePath, m_ignoreListBox);
             UpdatePath(m_newCoreOptions.validPath, m_validListBox);
             UpdatePath(m_newCoreOptions.deletePath, m_deleteListBox);
+
+            AdjustWidthToPaths();
         }
 
         private void AdjustWidthToPaths()
