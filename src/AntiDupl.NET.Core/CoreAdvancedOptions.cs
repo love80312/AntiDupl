@@ -28,15 +28,26 @@ using System.Text;
 using AntiDupl.NET.Core.Original;
 
 namespace AntiDupl.NET.Core
-{
+{   /// <summary>
+    /// Contains advanced options for AntiDupl core processing.
+    /// </summary>
     public class CoreAdvancedOptions : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Specifies whether deleted files are moved to the Recycle Bin.
+        /// </summary>
         public bool deleteToRecycleBin;
         public bool mistakeDataBase;
         public int ratioResolution;
+        /// <summary>
+        /// Specifies the number of threads used to compare images.
+        /// </summary>
         public int compareThreadCount;
         public int collectThreadCount;
         public int reducedImageSize;
+        /// <summary>
+        /// Specifies the maximum size of the undo queue.
+        /// </summary>
         public int undoQueueSize;
         public int resultCountMax;
         public int ignoreFrameWidth;
