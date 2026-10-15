@@ -1,8 +1,13 @@
 
+
 name: AntiDupl Personal Build
 
 on:
+  push:
+    branches:
+      - a
   workflow_dispatch:
+
 
 permissions:
   contents: read
