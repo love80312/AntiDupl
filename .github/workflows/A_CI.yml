@@ -2,10 +2,6 @@
 name: AntiDupl Personal Build
 
 on:
-  push:
-    branches:
-      - master
-      - a
   workflow_dispatch:
 
 permissions:
@@ -16,11 +12,6 @@ env:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        configuration: [Release, Publish]
-
     runs-on: windows-latest
 
     env:
@@ -58,70 +49,41 @@ jobs:
         run: |
           .\vcpkg.exe integrate install
 
-      - name: Build Release
-        if: matrix.configuration == 'Release'
-        run: msbuild /p:Configuration=Release /p:Platform=x64 $env:Solution_Name
-
-      - name: Build Publish
-        if: matrix.configuration == 'Publish'
+      - name: Build SingleFilePortable
         run: msbuild $env:Solution_Name /p:Configuration=Publish /p:Platform=x64 -restore -t:Publish -p:PublishProfile="AntiDuplPublishSingleFile"
 
-      - name: Make Release package
-        if: matrix.configuration == 'Release'
-        run: |
-          cd cmd
-          .\MakeBin.cmd
-
-      - name: Make SingleFilePortable package
-        if: matrix.configuration == 'Publish'
+      - name: Package SingleFilePortable
         run: |
           cd cmd
           .\MakePublish.cmd
 
-      - name: Generate correct portable SHA-256 checksums
-        if: matrix.configuration == 'Publish'
+      - name: Generate SHA-256 checksums
         shell: pwsh
         env:
           VERSION: ${{ steps.version.outputs.content }}
         run: |
-          $publishDir = Join-Path $env:GITHUB_WORKSPACE "out\publish"
-          $base = Join-Path $publishDir "AntiDupl.NET-$($env:VERSION)"
+          $base = Join-Path $env:GITHUB_WORKSPACE "out\publish\AntiDupl.NET-$($env:VERSION)"
 
           foreach ($suffix in @("_SingleFilePortable.exe", "_SingleFilePortable.zip")) {
-            $filePath = "$base$suffix"
+            $file = "$base$suffix"
 
-            if (-not (Test-Path -LiteralPath $filePath)) {
-              throw "File not found: $filePath"
+            if (-not (Test-Path -LiteralPath $file)) {
+              throw "File not found: $file"
             }
 
-            $hash = (Get-FileHash -LiteralPath $filePath -Algorithm SHA256).Hash
-            $hashPath = "$filePath.hash.txt"
-            "$hash  $(Split-Path -Leaf $filePath)" |
-              Set-Content -LiteralPath $hashPath -Encoding ascii
+            $hash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash
+            "$hash  $(Split-Path -Leaf $file)" |
+              Set-Content -LiteralPath "$file.hash.txt" -Encoding ascii
           }
 
-      - name: Upload Release build
-        if: matrix.configuration == 'Release'
-        uses: actions/upload-artifact@v7
-        with:
-          name: AntiDupl.NET-${{ steps.version.outputs.content }}-Release
-          path: |
-            ${{ github.workspace }}\out\bin\AntiDupl.NET-${{ steps.version.outputs.content }}.exe
-            ${{ github.workspace }}\out\bin\AntiDupl.NET-${{ steps.version.outputs.content }}.exe.hash.txt
-            ${{ github.workspace }}\out\bin\AntiDupl.NET-${{ steps.version.outputs.content }}.zip
-            ${{ github.workspace }}\out\bin\AntiDupl.NET-${{ steps.version.outputs.content }}.zip.hash.txt
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Upload SingleFilePortable build
-        if: matrix.configuration == 'Publish'
+      - name: Upload SingleFilePortable
         uses: actions/upload-artifact@v7
         with:
           name: AntiDupl.NET-${{ steps.version.outputs.content }}-SingleFilePortable
           path: |
-            ${{ github.workspace }}\out\publish\AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.exe
-            ${{ github.workspace }}\out\publish\AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.exe.hash.txt
-            ${{ github.workspace }}\out\publish\AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.zip
-            ${{ github.workspace }}\out\publish\AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.zip.hash.txt
+            out/publish/AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.exe
+            out/publish/AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.exe.hash.txt
+            out/publish/AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.zip
+            out/publish/AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.zip.hash.txt
           if-no-files-found: error
           retention-days: 30
