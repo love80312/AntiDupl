@@ -28,7 +28,7 @@
 
 //Install vcpkg to get libheif see https://github.com/microsoft/vcpkg
 #include "libheif\heif.h"
-
+#include <limits>
 namespace ad
 {
 	bool THeif::Supported(HGLOBAL hGlobal)
@@ -71,7 +71,17 @@ namespace ad
 
 			heif_error = heif_context_read_from_memory_without_copy(heif_ctx, data, data_size, nullptr);
 
-			int numCPU = SimdCpuInfo(SimdCpuInfoCores);
+			
+			auto cpuCount = SimdCpuInfo(SimdCpuInfoCores);
+			
+			const auto maxCpuCount =
+			    static_cast<decltype(cpuCount)>(
+			        std::numeric_limits<int>::max());
+			
+			const int numCPU = cpuCount > maxCpuCount
+			    ? std::numeric_limits<int>::max()
+			    : static_cast<int>(cpuCount);
+			
 			heif_context_set_max_decoding_threads(heif_ctx, numCPU);
 
 			::GlobalUnlock(hGlobal);
