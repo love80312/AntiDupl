@@ -1,5 +1,4 @@
 
-
 name: AntiDupl Personal Build
 
 on:
@@ -7,7 +6,6 @@ on:
     branches:
       - a
   workflow_dispatch:
-
 
 permissions:
   contents: read
@@ -62,33 +60,10 @@ jobs:
           cd cmd
           .\MakePublish.cmd
 
-      - name: Generate SHA-256 checksums
-        shell: pwsh
-        env:
-          VERSION: ${{ steps.version.outputs.content }}
-        run: |
-          $base = Join-Path $env:GITHUB_WORKSPACE "out\publish\AntiDupl.NET-$($env:VERSION)"
-
-          foreach ($suffix in @("_SingleFilePortable.exe", "_SingleFilePortable.zip")) {
-            $file = "$base$suffix"
-
-            if (-not (Test-Path -LiteralPath $file)) {
-              throw "File not found: $file"
-            }
-
-            $hash = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash
-            "$hash  $(Split-Path -Leaf $file)" |
-              Set-Content -LiteralPath "$file.hash.txt" -Encoding ascii
-          }
-
-      - name: Upload SingleFilePortable
+      - name: Upload SingleFilePortable ZIP
         uses: actions/upload-artifact@v7
         with:
           name: AntiDupl.NET-${{ steps.version.outputs.content }}-SingleFilePortable
-          path: |
-            out/publish/AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.exe
-            out/publish/AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.exe.hash.txt
-            out/publish/AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.zip
-            out/publish/AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.zip.hash.txt
+          path: out/publish/AntiDupl.NET-${{ steps.version.outputs.content }}_SingleFilePortable.zip
           if-no-files-found: error
           retention-days: 30
