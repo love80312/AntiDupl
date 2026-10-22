@@ -33,8 +33,77 @@
 #include "adPixelData.h"
 #include "adBlurringDetector.h"
 
+#define XXH_INLINE_ALL
+#include <xxhash.h>
+
 namespace ad
 {
+    // Агрегация сумм по BLOCKINESS_SIZE-блокам: (max−next)/(max+next)×100.
+    static double GetBlockinessSums(const std::vector<unsigned int> & sums)
+    {
+        std::vector<unsigned int> block(BLOCKINESS_SIZE, 0);
+        size_t end = (sums.size() - 1)/block.size()*block.size(); 
+        for(size_t i = 0; i < end; ++i)
+            block[i%block.size()] += sums[i];
+        std::sort(block.rbegin(), block.rend());
+        const double denominator = double(block[0]) + double(block[1]);
+        // Плоское изображение (суммы нулевые) — нулевой знаменатель: 0 вместо NaN.
+        return denominator == 0.0 ? 0.0 : double(block[0] - block[1])/denominator*100.0;
+    }
+
+    // Алгоритм идентичен классическому пайплайну (TDataCollector::GetBlockiness):
+    // суммы |dY| по строкам и |dX| по столбцам серого растра, агрегация по 8×8-блокам,
+    // (max−next)/(max+next)×100 по минимальному из двух направлений.
+    double ComputeBlockiness(const TView & gray)
+    {
+        AD_FUNCTION_PERFORMANCE_TEST
+
+        if(gray.height < BLOCKINESS_SIZE + 1 || gray.width < BLOCKINESS_SIZE + 1)
+            return 0;
+
+        std::vector<unsigned int> rowSums(gray.height);
+        Simd::GetAbsDyRowSums(gray, &rowSums[0]);
+        double verticalBlockiness = GetBlockinessSums(rowSums);
+
+        std::vector<unsigned int> colSums(gray.width);
+        Simd::GetAbsDxColSums(gray, &colSums[0]);
+        double horizontalBlockiness = GetBlockinessSums(colSums);
+
+        return std::min(verticalBlockiness, horizontalBlockiness);
+    }
+  
+    // XXH3-64 of the image as BGRA rows, the layout most decoders give; the
+    // others are converted row by row, so the same pixels hash the same
+    // whatever the file format. 0 is kept for "unknown".
+    static uint64_t GetPixelHash(const TView & view)
+    {
+        if (view.format != TView::Bgra32 && view.format != TView::Rgba32 && view.format != TView::Rgb24)
+            return 0;
+        XXH3_state_t * state = XXH3_createState();
+        if (state == NULL)
+            return 0;
+        XXH3_64bits_reset(state);
+        const size_t rowSize = view.width * 4;
+        std::vector<TUInt8> row(rowSize);
+        for (size_t y = 0; y < view.height; ++y)
+        {
+            const TUInt8 * src = view.data + y * view.stride;
+            if (view.format == TView::Bgra32)
+            {
+                XXH3_64bits_update(state, src, rowSize);
+                continue;
+            }
+            if (view.format == TView::Rgba32)
+                SimdBgraToRgba(src, view.width, 1, view.stride, row.data(), rowSize); // swaps red and blue
+            else
+                SimdRgbToBgra(src, view.width, 1, view.stride, row.data(), rowSize, 0xFF);
+            XXH3_64bits_update(state, row.data(), rowSize);
+        }
+        uint64_t hash = XXH3_64bits_digest(state);
+        XXH3_freeState(state);
+        return hash == 0 ? 1 : hash;
+    }
+
     TDataCollector::TDataCollector(TEngine *pEngine)
         :m_pOptions(pEngine->Options()),
         m_pResult(pEngine->Result())
@@ -104,6 +173,7 @@ namespace ad
 			TPixelData & data = *pImageData->data;
             TView reducedView(data.side, data.side, data.side, TView::Gray8, data.main);
             ReduceGray2x2(*m_pGrayBuffers.back(), reducedView);
+            data.pixelHash = GetPixelHash(*pImage->View());
             data.filled = true;
 
 			delete pImage;
@@ -166,29 +236,11 @@ namespace ad
 
 	double TDataCollector::GetBlockiness(const TView & gray)
 	{
-		AD_FUNCTION_PERFORMANCE_TEST
-
-		if(gray.height < BLOCKINESS_SIZE + 1 || gray.width < BLOCKINESS_SIZE + 1)
-			return 0;
-
-		std::vector<unsigned int> rowSums(gray.height);
-		Simd::GetAbsDyRowSums(gray, &rowSums[0]);
-		double verticalBlockiness = GetBlockiness(rowSums);
-
-		std::vector<unsigned int> colSums(gray.width);
-		Simd::GetAbsDxColSums(gray, &colSums[0]);
-		double horizontalBlockiness = GetBlockiness(colSums);
-
-		return std::min(verticalBlockiness, horizontalBlockiness);
+		return ComputeBlockiness(gray);
 	}
 
 	double TDataCollector::GetBlockiness(const std::vector<unsigned int> & sums)
 	{
-		std::vector<unsigned int> block(BLOCKINESS_SIZE, 0);
-		size_t end = (sums.size() - 1)/block.size()*block.size(); 
-		for(size_t i = 0; i < end; ++i)
-			block[i%block.size()] += sums[i];
-		std::sort(block.rbegin(), block.rend());
-		return double(block[0] - block[1])/double(block[0] + block[1])*100.0;
+		return GetBlockinessSums(sums);
 	}
 }

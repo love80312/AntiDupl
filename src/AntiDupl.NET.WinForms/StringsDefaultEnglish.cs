@@ -138,6 +138,8 @@ namespace AntiDupl.NET.WinForms
             s.CoreOptionsForm_ImageDiffTabPage_Text = "Image Difftool";
             s.CoreOptionsForm_ImageDiffExecutablePathLabeledStringEdit_Text = "Executable path:";
             s.CoreOptionsForm_ImageDiffExecutableArgumentsLabeledStringEdit_Text = "Executable arguments (given by \"%1\" \"%2\"):";
+            s.CoreOptionsForm_ImageDiff2ExecutablePathLabeledStringEdit_Text = "Second tool, executable path:";
+            s.CoreOptionsForm_ImageDiff2ExecutableArgumentsLabeledStringEdit_Text = "Second tool, executable arguments (given by \"%1\" \"%2\"):";
 
             s.CorePathsForm_Text = "Paths";
             s.CorePathsForm_SearchTabPage_Text = "Search";
@@ -187,6 +189,7 @@ namespace AntiDupl.NET.WinForms
             s.ResultsPreviewDuplPair_OpenBothFoldersButton_ToolTip_Text = "Open both containing folders";
             s.ResultsPreviewDuplPair_OpenBothImagesButton_ToolTip_Text = "Open both images";
             s.ResultsPreviewDuplPair_ExternDiffImagesButton_ToolTip_Text = "Open image difference with external tool";
+            s.ResultsPreviewDuplPair_ExternDiffImages2Button_ToolTip_Text = "Open image difference with the second external tool";
 
             s.ResultsPreviewDefect_DeleteButton_ToolTip_Text = "Delete picture";
             s.ResultsPreviewDefect_MistakeButton_ToolTip_Text = "Mark current result as a mistake";
@@ -213,6 +216,9 @@ namespace AntiDupl.NET.WinForms
             s.ResultRowSetter_MirrorTurn_90_Icon_ToolTip_Text = "Horizontally flipped and rotated on 90°";
             s.ResultRowSetter_MirrorTurn_180_Icon_ToolTip_Text = "Horizontally flipped and rotated on 180°";
             s.ResultRowSetter_MirrorTurn_270_Icon_ToolTip_Text = "Horizontally flipped and rotated on 270°";
+
+            s.ResultRowSetter_Difference_ByteIdentical_ToolTip_Text = "Identical files";
+            s.ResultRowSetter_Difference_PixelIdentical_ToolTip_Text = "Identical images, the files differ";
 
             s.ResultsListView_Type_Column_Text = "Type";
             s.ResultsListView_Group_Column_Text = "Group";
