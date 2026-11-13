@@ -202,7 +202,7 @@
   <MainStatusStrip_SelectedLabel_Text>已選取： </MainStatusStrip_SelectedLabel_Text>
   <MainMenu_FileMenuItem_Text>檔案</MainMenu_FileMenuItem_Text>
   <MainMenu_File_OpenProfileMenuItem_Text>開啟搜尋設定檔</MainMenu_File_OpenProfileMenuItem_Text>
-<MainMenu_File_SaveProfileAsMenuItem_Text>另存搜尋設定檔</MainMenu_File_SaveProfileAsMenuItem_Text>
+  <MainMenu_File_SaveProfileAsMenuItem_Text>另存搜尋設定檔</MainMenu_File_SaveProfileAsMenuItem_Text>
   <MainMenu_File_LoadProfileOnLoadingMenuItem_Text>載入時載入設定檔</MainMenu_File_LoadProfileOnLoadingMenuItem_Text>
   <MainMenu_File_SaveProfileOnClosingMenuItem_Text>關閉時儲存設定檔</MainMenu_File_SaveProfileOnClosingMenuItem_Text>
   <MainMenu_File_ExitMenuItem_Text>結束</MainMenu_File_ExitMenuItem_Text>
@@ -260,4 +260,22 @@
   <ImagePreviewPanel_EXIF_Tooltip_DateTime>日期/時間： </ImagePreviewPanel_EXIF_Tooltip_DateTime>
   <ImagePreviewPanel_EXIF_Tooltip_Artist>藝術家： </ImagePreviewPanel_EXIF_Tooltip_Artist>
   <ImagePreviewPanel_EXIF_Tooltip_UserComment>註解： </ImagePreviewPanel_EXIF_Tooltip_UserComment>
+  <MainForm_SearchFoldersNotFound>命令列指定的下列搜尋資料夾不存在，已從搜尋清單中略過：&#xA;{0}</MainForm_SearchFoldersNotFound>
+  <MainForm_IgnoreFoldersNotFound>命令列指定的下列忽略資料夾不存在，已略過：&#xA;{0}</MainForm_IgnoreFoldersNotFound>
+  <ErrorMessage_SettingsFileUnreadable>無法讀取設定檔：&#xA;{0}&#xA;&#xA;{1}&#xA;&#xA;程式將改用預設設定，並在關閉時將預設設定儲存至此檔案。無法讀取的設定檔副本已保留為：&#xA;{2}</ErrorMessage_SettingsFileUnreadable>
+  <ErrorMessage_SettingsFileUnreadableNotCopied>無法讀取設定檔：&#xA;{0}&#xA;&#xA;{1}&#xA;&#xA;程式將改用預設設定，並在關閉時將預設設定儲存至此檔案。無法建立設定檔的備份副本；若要保留原始檔案，請在關閉程式前先將它複製到其他位置。</ErrorMessage_SettingsFileUnreadableNotCopied>
+  <CoreOptionsForm_ShiftedImageCheckBox_Text>搜尋有位移的重複圖片</CoreOptionsForm_ShiftedImageCheckBox_Text>
+  <CoreOptionsForm_AlgorithmComparingLabeledComboBox_LocalColor>局部色彩差異</CoreOptionsForm_AlgorithmComparingLabeledComboBox_LocalColor>
+  <CoreOptionsForm_SkipHardlinksCheckBox_Text>不比對硬連結的重複檔案</CoreOptionsForm_SkipHardlinksCheckBox_Text>
+  <CoreOptionsForm_ImageDiff2ExecutablePathLabeledStringEdit_Text>第二個工具的執行檔路徑：</CoreOptionsForm_ImageDiff2ExecutablePathLabeledStringEdit_Text>
+  <CoreOptionsForm_ImageDiff2ExecutableArgumentsLabeledStringEdit_Text>第二個工具的執行參數（以 "%1"、"%2" 代入兩張圖片的路徑）：</CoreOptionsForm_ImageDiff2ExecutableArgumentsLabeledStringEdit_Text>
+  <ResultsPreviewDuplPair_ExternDiffImages2Button_ToolTip_Text>使用第二個外部圖片差異工具檢視圖片差異</ResultsPreviewDuplPair_ExternDiffImages2Button_ToolTip_Text>
+  <ResultRowSetter_Difference_HardLink_ToolTip_Text>硬連結：兩個名稱實際上指向同一個檔案</ResultRowSetter_Difference_HardLink_ToolTip_Text>
+  <ResultRowSetter_Difference_ByteIdentical_ToolTip_Text>檔案內容完全相同</ResultRowSetter_Difference_ByteIdentical_ToolTip_Text>
+  <ResultRowSetter_Difference_PixelIdentical_ToolTip_Text>圖片像素完全相同，但檔案內容不同</ResultRowSetter_Difference_PixelIdentical_ToolTip_Text>
+  <ColorModeMenuItem_Text>佈景主題</ColorModeMenuItem_Text>
+  <ColorModeMenuItem_SystemMenuItem_Text>依照 Windows 設定</ColorModeMenuItem_SystemMenuItem_Text>
+  <ColorModeMenuItem_LightMenuItem_Text>淺色</ColorModeMenuItem_LightMenuItem_Text>
+  <ColorModeMenuItem_DarkMenuItem_Text>深色</ColorModeMenuItem_DarkMenuItem_Text>
+  <ColorModeMenuItem_RestartMessage>佈景主題變更將於下次啟動程式時生效。</ColorModeMenuItem_RestartMessage>
 </Strings>
