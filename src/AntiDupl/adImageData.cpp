@@ -103,10 +103,12 @@ namespace ad
 		else
 		{
 			memcpy(data->fast, imageData.data->fast, data->full);
+			memcpy(data->color, imageData.data->color, COLOR_DATA_SIZE);
 			data->average = imageData.data->average;
 			data->varianceSquare = imageData.data->varianceSquare;
 			data->sum = imageData.data->sum;
 			data->sumSquare = imageData.data->sumSquare;
+			data->pixelHash = imageData.data->pixelHash;
 		}
 		return *this;
 	}
@@ -131,6 +133,11 @@ namespace ad
 
 	TDefectType TImageData::GetDefect(const TOptions * pOptions) const
 	{
+		// A file that couldn't be read or decoded has no size for the limits
+		// below to judge, and would vanish without a trace.
+		if(pOptions->defect.checkOnDefect == TRUE && defect == AD_DEFECT_UNKNOWN)
+			return defect;
+
 		TUInt32 maxSize = pOptions->compare.maximalImageSize;
 		TUInt32 minSize = pOptions->compare.minimalImageSize;
 		if(width >= minSize && width <= maxSize && height >= minSize && height <= maxSize)

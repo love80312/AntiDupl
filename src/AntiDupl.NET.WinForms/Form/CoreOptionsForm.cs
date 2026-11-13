@@ -39,13 +39,70 @@ namespace AntiDupl.NET.WinForms
         static public int THRESHOLD_DIFFERENCE_MAX_SSIM = 50;
         static public int THRESHOLD_DIFFERENCE_DEFAULT_SQUARED_SUM = 5;
         static public int THRESHOLD_DIFFERENCE_DEFAULT_SSIM = 20;
+        static public int THRESHOLD_DIFFERENCE_MAX_LOCAL_COLOR = 50;
+        static public int THRESHOLD_DIFFERENCE_DEFAULT_LOCAL_COLOR = 4;
+
+        /// <summary>The highest threshold the lists offer for an algorithm.</summary>
+        static public int ThresholdMax(AlgorithmComparing algorithm)
+        {
+            if (algorithm == AlgorithmComparing.SquaredSum)
+                return THRESHOLD_DIFFERENCE_MAX_SQUARED_SUM;
+            if (algorithm == AlgorithmComparing.LocalColor)
+                return THRESHOLD_DIFFERENCE_MAX_LOCAL_COLOR;
+            return THRESHOLD_DIFFERENCE_MAX_SSIM;
+        }
+
+        /// <summary>The threshold an algorithm starts with when it is chosen.</summary>
+        static public int ThresholdDefault(AlgorithmComparing algorithm)
+        {
+            if (algorithm == AlgorithmComparing.SquaredSum)
+                return THRESHOLD_DIFFERENCE_DEFAULT_SQUARED_SUM;
+            if (algorithm == AlgorithmComparing.LocalColor)
+                return THRESHOLD_DIFFERENCE_DEFAULT_LOCAL_COLOR;
+            return THRESHOLD_DIFFERENCE_DEFAULT_SSIM;
+        }
+
+        /// <summary>The thresholds the lists offer for an algorithm.</summary>
+        static public double[] ThresholdValues(AlgorithmComparing algorithm)
+        {
+            return CoreCompareOptions.ThresholdSteps(ThresholdMax(algorithm));
+        }
+
+        /// <summary>
+        /// Fills a list with an algorithm's thresholds. An item's value is the
+        /// threshold in hundredths of a percent, since LabeledComboBox.Value
+        /// holds a whole number.
+        /// </summary>
+        static public void FillThresholds(ComboBox comboBox, AlgorithmComparing algorithm)
+        {
+            comboBox.Items.Clear();
+            foreach (double value in ThresholdValues(algorithm))
+                comboBox.Items.Add(new LabeledComboBox.Value((int)Math.Round(value * 100), string.Format("{0:0.##} %", value)));
+        }
+
+        /// <summary>Selects the listed threshold nearest to the value.</summary>
+        static public void SelectThreshold(ComboBox comboBox, double value)
+        {
+            int best = -1;
+            for (int i = 0; i < comboBox.Items.Count; i++)
+                if (best < 0 || Math.Abs(((LabeledComboBox.Value)comboBox.Items[i]).value - value * 100) <
+                    Math.Abs(((LabeledComboBox.Value)comboBox.Items[best]).value - value * 100))
+                    best = i;
+            comboBox.SelectedIndex = best;
+        }
+
+        static public double SelectedThreshold(ComboBox comboBox)
+        {
+            return ((LabeledComboBox.Value)comboBox.SelectedItem).value / 100.0;
+        }
+
         static public int THRESHOLD_BLOCKINESS_MAX = 60;
         static public int THRESHOLD_BLURRING_MAX = 32;
         static public int IGNORE_FRAME_WIDTH_MAX = 12;
         static public int IGNORE_FRAME_WIDTH_STEP = 3;
         
         static public int FORM_WIDTH = 450;
-        static public int FORM_HEIGHT = 400;
+        static public int FORM_HEIGHT = 460;
         static public int COMBO_BOX_WIDTH = 65;
         static public int COMBO_BOX_HEIGHT = 20;
 
@@ -65,6 +122,7 @@ namespace AntiDupl.NET.WinForms
         private TabPage m_compareTabPage;
         private CheckBox m_checkOnEqualityCheckBox;
         private CheckBox m_transformedImageCheckBox;
+        private CheckBox m_shiftedImageCheckBox;
         private CheckBox m_sizeControlCheckBox;
         private CheckBox m_typeControlCheckBox;
         private CheckBox m_ratioControlCheckBox;
@@ -74,6 +132,7 @@ namespace AntiDupl.NET.WinForms
         private LabeledIntegerEdit m_maximalImageSizeLabeledIntegerEdit;
         private CheckBox m_compareInsideOneFolderCheckBox;
         private CheckBox m_compareInsideOneSearchPathCheckBox;
+        private CheckBox m_skipHardlinksCheckBox;
 
         private TabPage m_defectTabPage;
         private CheckBox m_checkOnDefectCheckBox;
@@ -132,11 +191,15 @@ namespace AntiDupl.NET.WinForms
         private TabPage m_imageDiffTabPage;
         private LabeledStringEdit m_imageDiffExecutablePathLabeledStringEdit;
         private LabeledStringEdit m_imageDiffExecutableArgumentsLabeledStringEdit;
+        private LabeledStringEdit m_imageDiff2ExecutablePathLabeledStringEdit;
+        private LabeledStringEdit m_imageDiff2ExecutableArgumentsLabeledStringEdit;
 
         /// <summary>
         /// Все компоненты иницализированы.
         /// </summary>
         private bool m_inited = false;
+        // The algorithm the threshold list was filled for.
+        private AlgorithmComparing m_thresholdAlgorithm;
 
         public CoreOptionsForm(CoreLib core, Options options, CoreOptions coreOptions)
         {
@@ -167,8 +230,10 @@ namespace AntiDupl.NET.WinForms
             Resources.Help.Bind(this, Resources.Help.Options);
 
             TableLayoutPanel mainTableLayoutPanel = InitFactory.Layout.Create(1, 2, 5);
-            mainTableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 87F));
-            mainTableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 13F));
+            // The buttons need less than their row's share; the Compare tab's
+            // last check box gets the rest, clear of the tab's bottom edge.
+            mainTableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 89F));
+            mainTableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 11F));
             Controls.Add(mainTableLayoutPanel);
 
             m_mainTabControl = new TabControl();
@@ -202,6 +267,7 @@ namespace AntiDupl.NET.WinForms
             m_cancelButton = new Button();
             m_cancelButton.Click += new EventHandler(OnCancelButtonClick);
             mainButtonsTableLayoutPanel.Controls.Add(m_cancelButton, 2, 0);
+            CancelButton = m_cancelButton;
 
             m_setDefaultButton = new Button();
             m_setDefaultButton.AutoSize = true;
@@ -215,7 +281,7 @@ namespace AntiDupl.NET.WinForms
             m_compareTabPage = new TabPage();
             m_mainTabControl.Controls.Add(m_compareTabPage);
 
-            TableLayoutPanel checkTableLayoutPanel = InitFactory.Layout.Create(1, 10, 5); //column, row, padding
+            TableLayoutPanel checkTableLayoutPanel = InitFactory.Layout.Create(1, 13, 5); //column, row, padding
             checkTableLayoutPanel.AutoScroll = true;
             m_compareTabPage.Controls.Add(checkTableLayoutPanel);
 
@@ -225,43 +291,46 @@ namespace AntiDupl.NET.WinForms
             m_transformedImageCheckBox = InitFactory.CheckBox.Create(OnOptionChanged);
             checkTableLayoutPanel.Controls.Add(m_transformedImageCheckBox, 0, 1);
 
+            m_shiftedImageCheckBox = InitFactory.CheckBox.Create(OnOptionChanged);
+            checkTableLayoutPanel.Controls.Add(m_shiftedImageCheckBox, 0, 2);
+
             m_sizeControlCheckBox = InitFactory.CheckBox.Create(OnOptionChanged);
-            checkTableLayoutPanel.Controls.Add(m_sizeControlCheckBox, 0, 2);
+            checkTableLayoutPanel.Controls.Add(m_sizeControlCheckBox, 0, 3);
 
             m_typeControlCheckBox = InitFactory.CheckBox.Create(OnOptionChanged);
-            checkTableLayoutPanel.Controls.Add(m_typeControlCheckBox, 0, 3);
+            checkTableLayoutPanel.Controls.Add(m_typeControlCheckBox, 0, 4);
 
             m_ratioControlCheckBox = InitFactory.CheckBox.Create(OnOptionChanged);
-            checkTableLayoutPanel.Controls.Add(m_ratioControlCheckBox, 0, 4);
+            checkTableLayoutPanel.Controls.Add(m_ratioControlCheckBox, 0, 5);
 
             m_algorithmComparingLabeledComboBox = new LabeledComboBox(COMBO_BOX_WIDTH + 115, COMBO_BOX_HEIGHT, OnOptionChanged);
             m_algorithmComparingLabeledComboBox.comboBox.Items.Add(new LabeledComboBox.Value(0, Resources.Strings.Current.CoreOptionsForm_AlgorithmComparingLabeledComboBox_SquaredSum));
             m_algorithmComparingLabeledComboBox.comboBox.Items.Add(new LabeledComboBox.Value(1, "SSIM"));
-            checkTableLayoutPanel.Controls.Add(m_algorithmComparingLabeledComboBox, 0, 5);
+            m_algorithmComparingLabeledComboBox.comboBox.Items.Add(new LabeledComboBox.Value((int)AlgorithmComparing.LocalColor, Resources.Strings.Current.CoreOptionsForm_AlgorithmComparingLabeledComboBox_LocalColor));
+            checkTableLayoutPanel.Controls.Add(m_algorithmComparingLabeledComboBox, 0, 6);
 
             m_thresholdDifferenceLabeledComboBox = new LabeledComboBox(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT, OnOptionChanged);
-            if (m_newCoreOptions.compareOptions.algorithmComparing == AlgorithmComparing.SquaredSum)
-                for (int i = 0; i <= THRESHOLD_DIFFERENCE_MAX_SQUARED_SUM; i++)
-                    m_thresholdDifferenceLabeledComboBox.comboBox.Items.Add(new LabeledComboBox.Value(i, string.Format("{0} %", i)));
-            else
-                for (int i = 0; i <= THRESHOLD_DIFFERENCE_MAX_SSIM; i++)
-                    m_thresholdDifferenceLabeledComboBox.comboBox.Items.Add(new LabeledComboBox.Value(i, string.Format("{0} %", i)));
-            checkTableLayoutPanel.Controls.Add(m_thresholdDifferenceLabeledComboBox, 0, 6);
+            m_thresholdAlgorithm = m_newCoreOptions.compareOptions.algorithmComparing;
+            FillThresholds(m_thresholdDifferenceLabeledComboBox.comboBox, m_thresholdAlgorithm);
+            checkTableLayoutPanel.Controls.Add(m_thresholdDifferenceLabeledComboBox, 0, 7);
 
             m_minimalImageSizeLabeledIntegerEdit = new LabeledIntegerEdit(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT, OnOptionChanged);
             m_minimalImageSizeLabeledIntegerEdit.Min = 0;
             m_minimalImageSizeLabeledIntegerEdit.Default = m_defaultCoreOptions.compareOptions.minimalImageSize;
-            checkTableLayoutPanel.Controls.Add(m_minimalImageSizeLabeledIntegerEdit, 0, 7);
+            checkTableLayoutPanel.Controls.Add(m_minimalImageSizeLabeledIntegerEdit, 0, 8);
 
             m_maximalImageSizeLabeledIntegerEdit = new LabeledIntegerEdit(COMBO_BOX_WIDTH, COMBO_BOX_HEIGHT, OnOptionChanged);
             m_maximalImageSizeLabeledIntegerEdit.Min = 0;
             m_maximalImageSizeLabeledIntegerEdit.Default = m_defaultCoreOptions.compareOptions.maximalImageSize;
-            checkTableLayoutPanel.Controls.Add(m_maximalImageSizeLabeledIntegerEdit, 0, 8);
+            checkTableLayoutPanel.Controls.Add(m_maximalImageSizeLabeledIntegerEdit, 0, 9);
 
             m_compareInsideOneFolderCheckBox = InitFactory.CheckBox.Create(OnOptionChanged);
-            checkTableLayoutPanel.Controls.Add(m_compareInsideOneFolderCheckBox, 0, 9);
+            checkTableLayoutPanel.Controls.Add(m_compareInsideOneFolderCheckBox, 0, 10);
             m_compareInsideOneSearchPathCheckBox = InitFactory.CheckBox.Create(OnOptionChanged);
-            checkTableLayoutPanel.Controls.Add(m_compareInsideOneSearchPathCheckBox, 0, 10);
+            checkTableLayoutPanel.Controls.Add(m_compareInsideOneSearchPathCheckBox, 0, 11);
+
+            m_skipHardlinksCheckBox = InitFactory.CheckBox.Create(OnOptionChanged);
+            checkTableLayoutPanel.Controls.Add(m_skipHardlinksCheckBox, 0, 12);
         }
 
         private void InitilizeDefectTabPage()
@@ -520,6 +589,14 @@ namespace AntiDupl.NET.WinForms
             m_imageDiffExecutableArgumentsLabeledStringEdit = new LabeledStringEdit(COMBO_BOX_WIDTH + 300, COMBO_BOX_HEIGHT, OnOptionChanged);
             m_imageDiffExecutableArgumentsLabeledStringEdit.Value = m_options.imageDiffExecutableArguments;
             imageDiffTableLayoutPanel.Controls.Add(m_imageDiffExecutableArgumentsLabeledStringEdit, 0, 12);
+
+            m_imageDiff2ExecutablePathLabeledStringEdit = new LabeledStringEdit(COMBO_BOX_WIDTH + 300, COMBO_BOX_HEIGHT, OnOptionChanged);
+            m_imageDiff2ExecutablePathLabeledStringEdit.Value = m_options.imageDiff2ExecutablePath;
+            imageDiffTableLayoutPanel.Controls.Add(m_imageDiff2ExecutablePathLabeledStringEdit, 0, 13);
+
+            m_imageDiff2ExecutableArgumentsLabeledStringEdit = new LabeledStringEdit(COMBO_BOX_WIDTH + 300, COMBO_BOX_HEIGHT, OnOptionChanged);
+            m_imageDiff2ExecutableArgumentsLabeledStringEdit.Value = m_options.imageDiff2ExecutableArguments;
+            imageDiffTableLayoutPanel.Controls.Add(m_imageDiff2ExecutableArgumentsLabeledStringEdit, 0, 14);
         }
 
         private void OnHighlightChanged(object sender, EventArgs e)
@@ -579,15 +656,17 @@ namespace AntiDupl.NET.WinForms
         {
             m_checkOnEqualityCheckBox.Checked = m_newCoreOptions.compareOptions.checkOnEquality;
             m_transformedImageCheckBox.Checked = m_newCoreOptions.compareOptions.transformedImage;
+            m_shiftedImageCheckBox.Checked = m_newCoreOptions.compareOptions.shiftedImage;
             m_sizeControlCheckBox.Checked = m_newCoreOptions.compareOptions.sizeControl;
             m_typeControlCheckBox.Checked = m_newCoreOptions.compareOptions.typeControl;
             m_ratioControlCheckBox.Checked = m_newCoreOptions.compareOptions.ratioControl;
             m_algorithmComparingLabeledComboBox.SelectedValue = (int)m_newCoreOptions.compareOptions.algorithmComparing;
-            m_thresholdDifferenceLabeledComboBox.SelectedValue = m_newCoreOptions.compareOptions.thresholdDifference;
+            SelectThreshold(m_thresholdDifferenceLabeledComboBox.comboBox, m_newCoreOptions.compareOptions.thresholdDifference);
             m_minimalImageSizeLabeledIntegerEdit.Value = m_newCoreOptions.compareOptions.minimalImageSize;
             m_maximalImageSizeLabeledIntegerEdit.Value = m_newCoreOptions.compareOptions.maximalImageSize;
             m_compareInsideOneFolderCheckBox.Checked = m_newCoreOptions.compareOptions.compareInsideOneFolder;
             m_compareInsideOneSearchPathCheckBox.Checked = m_newCoreOptions.compareOptions.compareInsideOneSearchPath;
+            m_skipHardlinksCheckBox.Checked = m_newCoreOptions.compareOptions.skipHardlinks;
 
             m_checkOnDefectCheckBox.Checked = m_newCoreOptions.defectOptions.checkOnDefect;
             m_checkOnBlockinessCheckBox.Checked = m_newCoreOptions.defectOptions.checkOnBlockiness;
@@ -629,6 +708,8 @@ namespace AntiDupl.NET.WinForms
 
             m_imageDiffExecutablePathLabeledStringEdit.Value = m_options.imageDiffExecutablePath;
             m_imageDiffExecutableArgumentsLabeledStringEdit.Value = m_options.imageDiffExecutableArguments;
+            m_imageDiff2ExecutablePathLabeledStringEdit.Value = m_options.imageDiff2ExecutablePath;
+            m_imageDiff2ExecutableArgumentsLabeledStringEdit.Value = m_options.imageDiff2ExecutableArguments;
         }
 
         /// <summary>
@@ -638,15 +719,17 @@ namespace AntiDupl.NET.WinForms
         {
             m_newCoreOptions.compareOptions.checkOnEquality = m_checkOnEqualityCheckBox.Checked;
             m_newCoreOptions.compareOptions.transformedImage = m_transformedImageCheckBox.Checked;
+            m_newCoreOptions.compareOptions.shiftedImage = m_shiftedImageCheckBox.Checked;
             m_newCoreOptions.compareOptions.sizeControl = m_sizeControlCheckBox.Checked;
             m_newCoreOptions.compareOptions.typeControl = m_typeControlCheckBox.Checked;
             m_newCoreOptions.compareOptions.ratioControl = m_ratioControlCheckBox.Checked;
             m_newCoreOptions.compareOptions.algorithmComparing = (AlgorithmComparing)m_algorithmComparingLabeledComboBox.SelectedValue;
-            m_newCoreOptions.compareOptions.thresholdDifference = m_thresholdDifferenceLabeledComboBox.SelectedValue;
+            m_newCoreOptions.compareOptions.thresholdDifference = SelectedThreshold(m_thresholdDifferenceLabeledComboBox.comboBox);
             m_newCoreOptions.compareOptions.minimalImageSize = m_minimalImageSizeLabeledIntegerEdit.Value;
             m_newCoreOptions.compareOptions.maximalImageSize = m_maximalImageSizeLabeledIntegerEdit.Value;
             m_newCoreOptions.compareOptions.compareInsideOneFolder = m_compareInsideOneFolderCheckBox.Checked;
             m_newCoreOptions.compareOptions.compareInsideOneSearchPath = m_compareInsideOneSearchPathCheckBox.Checked;
+            m_newCoreOptions.compareOptions.skipHardlinks = m_skipHardlinksCheckBox.Checked;
 
             m_newCoreOptions.defectOptions.checkOnDefect = m_checkOnDefectCheckBox.Checked;
             m_newCoreOptions.defectOptions.checkOnBlockiness = m_checkOnBlockinessCheckBox.Checked;
@@ -688,6 +771,8 @@ namespace AntiDupl.NET.WinForms
 
             m_options.imageDiffExecutablePath = m_imageDiffExecutablePathLabeledStringEdit.Value;
             m_options.imageDiffExecutableArguments = m_imageDiffExecutableArgumentsLabeledStringEdit.Value;
+            m_options.imageDiff2ExecutablePath = m_imageDiff2ExecutablePathLabeledStringEdit.Value;
+            m_options.imageDiff2ExecutableArguments = m_imageDiff2ExecutableArgumentsLabeledStringEdit.Value;
         }
 
         private void UpdateStrings()
@@ -702,6 +787,7 @@ namespace AntiDupl.NET.WinForms
             m_compareTabPage.Text = s.CoreOptionsForm_CompareTabPage_Text;
             m_checkOnEqualityCheckBox.Text = s.CoreOptionsForm_CheckOnEqualityCheckBox_Text;
             m_transformedImageCheckBox.Text = s.CoreOptionsForm_TransformedImageCheckBox_Text;
+            m_shiftedImageCheckBox.Text = s.CoreOptionsForm_ShiftedImageCheckBox_Text;
             m_sizeControlCheckBox.Text = s.CoreOptionsForm_SizeControlCheckBox_Text;
             m_typeControlCheckBox.Text = s.CoreOptionsForm_TypeControlCheckBox_Text;
             m_ratioControlCheckBox.Text = s.CoreOptionsForm_RatioControlCheckBox_Text;
@@ -711,6 +797,7 @@ namespace AntiDupl.NET.WinForms
             m_maximalImageSizeLabeledIntegerEdit.Text = s.CoreOptionsForm_MaximalImageSizeLabeledIntegerEdit_Text;
             m_compareInsideOneFolderCheckBox.Text = s.CoreOptionsForm_CompareInsideOneFolderCheckBox_Text;
             m_compareInsideOneSearchPathCheckBox.Text = s.CoreOptionsForm_CompareInsideOneSearchPathCheckBox_Text;
+            m_skipHardlinksCheckBox.Text = s.CoreOptionsForm_SkipHardlinksCheckBox_Text;
 
             m_defectTabPage.Text = s.CoreOptionsForm_DefectTabPage_Text;
             m_checkOnDefectCheckBox.Text = s.CoreOptionsForm_CheckOnDefectCheckBox_Text;
@@ -771,6 +858,8 @@ namespace AntiDupl.NET.WinForms
             m_imageDiffTabPage.Text = s.CoreOptionsForm_ImageDiffTabPage_Text;
             m_imageDiffExecutablePathLabeledStringEdit.Text = s.CoreOptionsForm_ImageDiffExecutablePathLabeledStringEdit_Text;
             m_imageDiffExecutableArgumentsLabeledStringEdit.Text = s.CoreOptionsForm_ImageDiffExecutableArgumentsLabeledStringEdit_Text;
+            m_imageDiff2ExecutablePathLabeledStringEdit.Text = s.CoreOptionsForm_ImageDiff2ExecutablePathLabeledStringEdit_Text;
+            m_imageDiff2ExecutableArgumentsLabeledStringEdit.Text = s.CoreOptionsForm_ImageDiff2ExecutableArgumentsLabeledStringEdit_Text;
         }
 
         /// <summary>
@@ -813,6 +902,11 @@ namespace AntiDupl.NET.WinForms
             m_setDefaultButton.Enabled = !m_defaultCoreOptions.Equals(m_newCoreOptions);
 
             m_transformedImageCheckBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality;
+            // Only these two have it: local colour's differences aren't the
+            // mean square the shift is measured in.
+            m_shiftedImageCheckBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality &&
+              (m_newCoreOptions.compareOptions.algorithmComparing == AlgorithmComparing.SquaredSum ||
+               m_newCoreOptions.compareOptions.algorithmComparing == AlgorithmComparing.SSIM);
             m_sizeControlCheckBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality;
             m_typeControlCheckBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality;
             m_ratioControlCheckBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality &&
@@ -820,6 +914,7 @@ namespace AntiDupl.NET.WinForms
             m_thresholdDifferenceLabeledComboBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality;
             m_compareInsideOneFolderCheckBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality;
             m_compareInsideOneSearchPathCheckBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality;
+            m_skipHardlinksCheckBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality;
 
             m_ratioResolutionLabeledComboBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality &&
               !m_newCoreOptions.compareOptions.sizeControl && m_newCoreOptions.compareOptions.ratioControl;
@@ -841,21 +936,14 @@ namespace AntiDupl.NET.WinForms
                 m_ignoreFrameWidthLabeledComboBox.SelectedValue = (m_newCoreOptions.advancedOptions.ignoreFrameWidth + step - 1) / step * step;
             }
 
-            if (m_algorithmComparingLabeledComboBox.SelectedValue == (int)AlgorithmComparing.SquaredSum &&
-                m_thresholdDifferenceLabeledComboBox.comboBox.Items.Count > THRESHOLD_DIFFERENCE_MAX_SQUARED_SUM + 1)
+            // Another algorithm brings its own range and starting threshold:
+            // the same percentage means different things to each.
+            AlgorithmComparing algorithm = (AlgorithmComparing)m_algorithmComparingLabeledComboBox.SelectedValue;
+            if (algorithm != m_thresholdAlgorithm)
             {
-                m_thresholdDifferenceLabeledComboBox.comboBox.Items.Clear();
-                for (int i = 0; i <= THRESHOLD_DIFFERENCE_MAX_SQUARED_SUM; i++)
-                    m_thresholdDifferenceLabeledComboBox.comboBox.Items.Add(new LabeledComboBox.Value(i, string.Format("{0} %", i)));
-                m_thresholdDifferenceLabeledComboBox.SelectedValue = THRESHOLD_DIFFERENCE_DEFAULT_SQUARED_SUM;
-            }
-            if (m_algorithmComparingLabeledComboBox.SelectedValue == (int)AlgorithmComparing.SSIM &&
-                m_thresholdDifferenceLabeledComboBox.comboBox.Items.Count < THRESHOLD_DIFFERENCE_MAX_SSIM + 1)
-            {
-                m_thresholdDifferenceLabeledComboBox.comboBox.Items.Clear();
-                for (int i = 0; i <= THRESHOLD_DIFFERENCE_MAX_SSIM; i++)
-                    m_thresholdDifferenceLabeledComboBox.comboBox.Items.Add(new LabeledComboBox.Value(i, string.Format("{0} %", i)));
-                m_thresholdDifferenceLabeledComboBox.SelectedValue = THRESHOLD_DIFFERENCE_DEFAULT_SSIM;
+                m_thresholdAlgorithm = algorithm;
+                FillThresholds(m_thresholdDifferenceLabeledComboBox.comboBox, algorithm);
+                SelectThreshold(m_thresholdDifferenceLabeledComboBox.comboBox, ThresholdDefault(algorithm));
             }
         }
 

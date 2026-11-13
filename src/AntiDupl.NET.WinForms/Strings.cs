@@ -93,16 +93,19 @@ namespace AntiDupl.NET.WinForms
         public string CoreOptionsForm_CompareTabPage_Text;
         public string CoreOptionsForm_CheckOnEqualityCheckBox_Text;
         public string CoreOptionsForm_TransformedImageCheckBox_Text;
+        public string CoreOptionsForm_ShiftedImageCheckBox_Text;
         public string CoreOptionsForm_SizeControlCheckBox_Text;
         public string CoreOptionsForm_TypeControlCheckBox_Text;
         public string CoreOptionsForm_RatioControlCheckBox_Text;
         public string CoreOptionsForm_AlgorithmComparingLabeledComboBox_Text;
         public string CoreOptionsForm_AlgorithmComparingLabeledComboBox_SquaredSum;
+        public string CoreOptionsForm_AlgorithmComparingLabeledComboBox_LocalColor;
         public string CoreOptionsForm_ThresholdDifferenceLabeledComboBox_Text;
         public string CoreOptionsForm_MinimalImageSizeLabeledIntegerEdit_Text;
         public string CoreOptionsForm_MaximalImageSizeLabeledIntegerEdit_Text;
         public string CoreOptionsForm_CompareInsideOneFolderCheckBox_Text;
         public string CoreOptionsForm_CompareInsideOneSearchPathCheckBox_Text;
+        public string CoreOptionsForm_SkipHardlinksCheckBox_Text;
 
         public string CoreOptionsForm_DefectTabPage_Text;
         public string CoreOptionsForm_CheckOnDefectCheckBox_Text;
@@ -141,6 +144,8 @@ namespace AntiDupl.NET.WinForms
         public string CoreOptionsForm_ImageDiffTabPage_Text;
         public string CoreOptionsForm_ImageDiffExecutablePathLabeledStringEdit_Text;
         public string CoreOptionsForm_ImageDiffExecutableArgumentsLabeledStringEdit_Text;
+        public string CoreOptionsForm_ImageDiff2ExecutablePathLabeledStringEdit_Text;
+        public string CoreOptionsForm_ImageDiff2ExecutableArgumentsLabeledStringEdit_Text;
 
         public string CorePathsForm_Text;
         public string CorePathsForm_SearchTabPage_Text;
@@ -190,6 +195,7 @@ namespace AntiDupl.NET.WinForms
         public string ResultsPreviewDuplPair_OpenBothFoldersButton_ToolTip_Text;
         public string ResultsPreviewDuplPair_OpenBothImagesButton_ToolTip_Text;
         public string ResultsPreviewDuplPair_ExternDiffImagesButton_ToolTip_Text;
+        public string ResultsPreviewDuplPair_ExternDiffImages2Button_ToolTip_Text;
 
         public string ResultsPreviewDefect_DeleteButton_ToolTip_Text;
         public string ResultsPreviewDefect_MistakeButton_ToolTip_Text;
@@ -216,6 +222,10 @@ namespace AntiDupl.NET.WinForms
         public string ResultRowSetter_MirrorTurn_90_Icon_ToolTip_Text;
         public string ResultRowSetter_MirrorTurn_180_Icon_ToolTip_Text;
         public string ResultRowSetter_MirrorTurn_270_Icon_ToolTip_Text;
+
+        public string ResultRowSetter_Difference_HardLink_ToolTip_Text;
+        public string ResultRowSetter_Difference_ByteIdentical_ToolTip_Text;
+        public string ResultRowSetter_Difference_PixelIdentical_ToolTip_Text;
 
         public string ResultsListView_Type_Column_Text;
         public string ResultsListView_Group_Column_Text;

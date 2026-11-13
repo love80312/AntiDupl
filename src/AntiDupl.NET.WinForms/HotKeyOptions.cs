@@ -41,6 +41,7 @@ namespace AntiDupl.NET.WinForms
             CurrentMistake,
             ShowNeighbours,
             OpenImageDiff,
+            OpenImageDiff2,
             Size
         }
         
@@ -82,6 +83,7 @@ namespace AntiDupl.NET.WinForms
             EnsureDefaultIfEmpty(Action.CurrentMistake, Keys.NumPad5);
             EnsureDefaultIfEmpty(Action.ShowNeighbours, Keys.Control | Keys.Q);
             EnsureDefaultIfEmpty(Action.OpenImageDiff, Keys.Control | Keys.D);
+            EnsureDefaultIfEmpty(Action.OpenImageDiff2, Keys.Control | Keys.Shift | Keys.D);
         }
 
         private void EnsureDefaultIfEmpty(Action action, Keys defaultKey)
@@ -104,6 +106,12 @@ namespace AntiDupl.NET.WinForms
             return false;
         }
 
+        /// <summary>A key or combination in the usual notation, such as Ctrl+Shift+D.</summary>
+        public static string Text(Keys keys)
+        {
+            return new KeysConverter().ConvertToString(keys);
+        }
+
         public Keys Get(Action action)
         {
             Check();
@@ -122,6 +130,7 @@ namespace AntiDupl.NET.WinForms
             keys[(int)Action.CurrentMistake] = Keys.NumPad5;
             keys[(int)Action.ShowNeighbours] = Keys.Control | Keys.Q;
             keys[(int)Action.OpenImageDiff] = Keys.Control | Keys.D;
+            keys[(int)Action.OpenImageDiff2] = Keys.Control | Keys.Shift | Keys.D;
         }
 
         public void SetDefault(Action action)
@@ -145,6 +154,8 @@ namespace AntiDupl.NET.WinForms
                 keys[(int)Action.ShowNeighbours] = Keys.Control | Keys.Q;
             if (action == Action.OpenImageDiff)
 				keys[(int)Action.OpenImageDiff] = Keys.Control | Keys.D;
+            if (action == Action.OpenImageDiff2)
+                keys[(int)Action.OpenImageDiff2] = Keys.Control | Keys.Shift | Keys.D;
             /*for(Keys key = Keys.NumPad1; key < Keys.NumPad7; key++)
             {
                 keys[(int)action] = key;

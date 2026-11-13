@@ -32,31 +32,39 @@
 
 namespace ad
 {
+    // Whether this process is long path aware, with long paths enabled in
+    // Windows (Windows 10 1607 and later).
+    static bool ProcessUsesLongPaths()
+    {
+        typedef BOOLEAN (NTAPI *TRtlAreLongPathsEnabled)();
+        static const TRtlAreLongPathsEnabled rtlAreLongPathsEnabled = (TRtlAreLongPathsEnabled)
+            ::GetProcAddress(::GetModuleHandle(TEXT("ntdll.dll")), "RtlAreLongPathsEnabled");
+        return rtlAreLongPathsEnabled != NULL && rtlAreLongPathsEnabled() != FALSE;
+    }
+
     bool FileDelete(const TChar *fileName, bool toRecycle)
     {
-        TChar buffer[MAX_PATH + 1];
-        SHFILEOPSTRUCT shFileOpStruct;
-        errno_t error;
-        size_t length;
-
-        length = _tcsnlen(fileName, MAX_PATH + 1);
-        if (length >= MAX_PATH)
+        TString path(fileName);
+        if (path.size() >= MAX_PATH)
         {
-#ifdef UNICODE
-            return ::DeleteFile(fileName) != FALSE;
-#else
-            return false;
-#endif
+            if (!toRecycle)
+                return ::DeleteFile(fileName) != FALSE;
+            // The shell refuses the \\?\ prefix but recycles the plain path,
+            // whatever its length, in a process that isn't long path aware.
+            // In one that is, it reports success and deletes the file for
+            // good, so the file stays.
+            if (ProcessUsesLongPaths())
+                return false;
+            if (path.compare(0, EXTENDED_PATH_PREFIX_SIZE, EXTENDED_PATH_PREFIX) == 0)
+                path.erase(0, EXTENDED_PATH_PREFIX_SIZE);
         }
-        error = _tcscpy_s(buffer, MAX_PATH + 1, fileName);
-        if(error != 0)
-            return false;
-        buffer[length + 1] = 0;
+        path.push_back(0); // SHFileOperation takes a list that ends in two zeros
 
+        SHFILEOPSTRUCT shFileOpStruct;
         ZeroMemory(&shFileOpStruct, sizeof(shFileOpStruct));
         shFileOpStruct.wFunc = FO_DELETE;
         shFileOpStruct.pTo = NULL;
-        shFileOpStruct.pFrom = buffer;
+        shFileOpStruct.pFrom = path.c_str();
         shFileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI;
         if(toRecycle)
             shFileOpStruct.fFlags |= FOF_ALLOWUNDO;
@@ -328,6 +336,28 @@ namespace ad
             path2;
     }
     
+    // Whether two paths lead to one file, as hard links do. A path that can't
+    // be opened counts as another file.
+    bool IsSameFile(const TChar* first, const TChar* second)
+    {
+        const TChar* paths[2] = {first, second};
+        BY_HANDLE_FILE_INFORMATION info[2];
+        for (int i = 0; i < 2; ++i)
+        {
+            HANDLE hFile = ::CreateFile(paths[i], 0, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                NULL, OPEN_EXISTING, 0, NULL);
+            if (hFile == INVALID_HANDLE_VALUE)
+                return false;
+            BOOL known = ::GetFileInformationByHandle(hFile, &info[i]);
+            ::CloseHandle(hFile);
+            if (!known)
+                return false;
+        }
+        return info[0].dwVolumeSerialNumber == info[1].dwVolumeSerialNumber &&
+            info[0].nFileIndexHigh == info[1].nFileIndexHigh &&
+            info[0].nFileIndexLow == info[1].nFileIndexLow;
+    }
+
     HGLOBAL LoadFileToMemory(const TChar* path)
     {
         AD_FUNCTION_PERFORMANCE_TEST

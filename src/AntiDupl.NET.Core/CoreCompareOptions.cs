@@ -35,15 +35,19 @@ namespace AntiDupl.NET.Core
     {
         public bool checkOnEquality;
         public bool transformedImage;
+        public bool shiftedImage;
         public bool sizeControl;
         public bool typeControl;
         public bool ratioControl;
-        public int thresholdDifference;
+        /// <summary>Percent; fractions allowed. Whole numbers in settings files saved before load as they are.</summary>
+        public double thresholdDifference;
         public int minimalImageSize;
         public int maximalImageSize;
         public bool compareInsideOneFolder;
         public bool compareInsideOneSearchPath;
         public AlgorithmComparing algorithmComparing;
+        /// <summary>On in a profile saved before the option existed.</summary>
+        public bool skipHardlinks = true;
 
         public CoreCompareOptions()
         {
@@ -53,6 +57,7 @@ namespace AntiDupl.NET.Core
         {
             checkOnEquality = compareOptions.checkOnEquality;
             transformedImage = compareOptions.transformedImage;
+            shiftedImage = compareOptions.shiftedImage;
             sizeControl = compareOptions.sizeControl;
             typeControl = compareOptions.typeControl;
             ratioControl = compareOptions.ratioControl;
@@ -62,12 +67,14 @@ namespace AntiDupl.NET.Core
             maximalImageSize = compareOptions.maximalImageSize;
             compareInsideOneFolder = compareOptions.compareInsideOneFolder;
             compareInsideOneSearchPath = compareOptions.compareInsideOneSearchPath;
+            skipHardlinks = compareOptions.skipHardlinks;
         }
 
         public CoreCompareOptions(ref CoreDll.adCompareOptions compareOptions)
         {
             checkOnEquality = compareOptions.checkOnEquality != CoreDll.FALSE;
             transformedImage = compareOptions.transformedImage != CoreDll.FALSE;
+            shiftedImage = compareOptions.shiftedImage != CoreDll.FALSE;
             sizeControl = compareOptions.sizeControl != CoreDll.FALSE;
             typeControl = compareOptions.typeControl != CoreDll.FALSE;
             ratioControl = compareOptions.ratioControl != CoreDll.FALSE;
@@ -77,12 +84,14 @@ namespace AntiDupl.NET.Core
             maximalImageSize = compareOptions.maximalImageSize;
             compareInsideOneFolder = compareOptions.compareInsideOneFolder != CoreDll.FALSE;
             compareInsideOneSearchPath = compareOptions.compareInsideOneSearchPath != CoreDll.FALSE;
+            skipHardlinks = compareOptions.skipHardlinks != CoreDll.FALSE;
         }
 
         public void ConvertTo(ref CoreDll.adCompareOptions compareOptions)
         {
             compareOptions.checkOnEquality = checkOnEquality ? CoreDll.TRUE : CoreDll.FALSE;
             compareOptions.transformedImage = transformedImage ? CoreDll.TRUE : CoreDll.FALSE;
+            compareOptions.shiftedImage = shiftedImage ? CoreDll.TRUE : CoreDll.FALSE;
             compareOptions.sizeControl = sizeControl ? CoreDll.TRUE : CoreDll.FALSE;
             compareOptions.typeControl = typeControl ? CoreDll.TRUE : CoreDll.FALSE;
             compareOptions.ratioControl = ratioControl ? CoreDll.TRUE : CoreDll.FALSE;
@@ -92,6 +101,7 @@ namespace AntiDupl.NET.Core
             compareOptions.maximalImageSize = maximalImageSize;
             compareOptions.compareInsideOneFolder = compareInsideOneFolder ? CoreDll.TRUE : CoreDll.FALSE;
             compareOptions.compareInsideOneSearchPath = compareInsideOneSearchPath ? CoreDll.TRUE : CoreDll.FALSE;
+            compareOptions.skipHardlinks = skipHardlinks ? CoreDll.TRUE : CoreDll.FALSE;
         }
 
         public CoreCompareOptions Clone()
@@ -99,11 +109,34 @@ namespace AntiDupl.NET.Core
             return new CoreCompareOptions(this);
         }
 
+        /// <summary>
+        /// The thresholds the option lists offer, up to max: quarters of a
+        /// percent under 1 %, then whole percents.
+        /// </summary>
+        public static double[] ThresholdSteps(int max)
+        {
+            var steps = new List<double> { 0, 0.25, 0.5, 0.75 };
+            for (int i = 1; i <= max; i++)
+                steps.Add(i);
+            return steps.ToArray();
+        }
+
+        /// <summary>The listed threshold up to max nearest to the value.</summary>
+        public static double NearestThresholdStep(double value, int max)
+        {
+            double best = 0;
+            foreach (double step in ThresholdSteps(max))
+                if (Math.Abs(step - value) < Math.Abs(best - value))
+                    best = step;
+            return best;
+        }
+
         public bool Equals(CoreCompareOptions compareOptions)
         {
             return
                 checkOnEquality == compareOptions.checkOnEquality &&
                 transformedImage == compareOptions.transformedImage &&
+                shiftedImage == compareOptions.shiftedImage &&
                 sizeControl == compareOptions.sizeControl &&
                 typeControl == compareOptions.typeControl &&
                 ratioControl == compareOptions.ratioControl &&
@@ -112,7 +145,8 @@ namespace AntiDupl.NET.Core
                 minimalImageSize == compareOptions.minimalImageSize &&
                 maximalImageSize == compareOptions.maximalImageSize &&
                 compareInsideOneFolder == compareOptions.compareInsideOneFolder &&
-                compareInsideOneSearchPath == compareOptions.compareInsideOneSearchPath;
+                compareInsideOneSearchPath == compareOptions.compareInsideOneSearchPath &&
+                skipHardlinks == compareOptions.skipHardlinks;
         }
 
         public bool CheckOnEquality
@@ -132,6 +166,16 @@ namespace AntiDupl.NET.Core
             {
                 transformedImage = value;
                 NotifyPropertyChanged("TransformedImage");
+            }
+        }
+
+        public bool ShiftedImage
+        {
+            get { return shiftedImage; }
+            set
+            {
+                shiftedImage = value;
+                NotifyPropertyChanged("ShiftedImage");
             }
         }
 
@@ -165,7 +209,7 @@ namespace AntiDupl.NET.Core
             }
         }
 
-        public int ThresholdDifference
+        public double ThresholdDifference
         {
             get { return thresholdDifference; }
             set
@@ -212,6 +256,16 @@ namespace AntiDupl.NET.Core
             {
                 compareInsideOneSearchPath = value;
                 NotifyPropertyChanged("CompareInsideOneSearchPath");
+            }
+        }
+
+        public bool SkipHardlinks
+        {
+            get { return skipHardlinks; }
+            set
+            {
+                skipHardlinks = value;
+                NotifyPropertyChanged("SkipHardlinks");
             }
         }
 

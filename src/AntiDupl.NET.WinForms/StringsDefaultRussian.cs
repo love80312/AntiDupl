@@ -90,15 +90,18 @@ namespace AntiDupl.NET.WinForms
             s.CoreOptionsForm_CompareTabPage_Text = "Сравнение";
             s.CoreOptionsForm_CheckOnEqualityCheckBox_Text = "Искать дублирующие картинки";
             s.CoreOptionsForm_TransformedImageCheckBox_Text = "Искать повернутые и зеркальные дубликаты";
+            s.CoreOptionsForm_ShiftedImageCheckBox_Text = "Искать дубликаты со сдвигом изображения";
             s.CoreOptionsForm_SizeControlCheckBox_Text = "Учитывать размер картинок";
             s.CoreOptionsForm_TypeControlCheckBox_Text = "Учитывать тип картинок";
             s.CoreOptionsForm_RatioControlCheckBox_Text = "Учитывать соотношение ширины/высоты картинок";
             s.CoreOptionsForm_AlgorithmComparingLabeledComboBox_Text = "Алгоритм сравнения изображений";
             s.CoreOptionsForm_AlgorithmComparingLabeledComboBox_SquaredSum = "Среднеквадратичная разность";
+            s.CoreOptionsForm_AlgorithmComparingLabeledComboBox_LocalColor = "Локальная разность цвета";
             s.CoreOptionsForm_ThresholdDifferenceLabeledComboBox_Text = "Пороговая разность";
             s.CoreOptionsForm_MinimalImageSizeLabeledIntegerEdit_Text = "Минимальная ширина/высота картинок";
             s.CoreOptionsForm_MaximalImageSizeLabeledIntegerEdit_Text = "Максимальная ширина/высота картинок";
             s.CoreOptionsForm_CompareInsideOneSearchPathCheckBox_Text = "Сравнивать картинки из одного пути поиска друг с другом";
+            s.CoreOptionsForm_SkipHardlinksCheckBox_Text = "Не сравнивать жесткие ссылки на один файл";
             s.CoreOptionsForm_CompareInsideOneFolderCheckBox_Text = "Сравнивать картинки внутри одного каталога";
 
             s.CoreOptionsForm_DefectTabPage_Text = "Дефекты";
@@ -138,6 +141,8 @@ namespace AntiDupl.NET.WinForms
             s.CoreOptionsForm_ImageDiffTabPage_Text = "Разница изображений инструмент";
             s.CoreOptionsForm_ImageDiffExecutablePathLabeledStringEdit_Text = "Исполняемый путь:";
             s.CoreOptionsForm_ImageDiffExecutableArgumentsLabeledStringEdit_Text = "Исполняемые аргументы (данные \"%1\" \"%2\"):";
+            s.CoreOptionsForm_ImageDiff2ExecutablePathLabeledStringEdit_Text = "Второй инструмент, исполняемый путь:";
+            s.CoreOptionsForm_ImageDiff2ExecutableArgumentsLabeledStringEdit_Text = "Второй инструмент, исполняемые аргументы (данные \"%1\" \"%2\"):";
 
             s.CorePathsForm_Text = "Пути";
             s.CorePathsForm_SearchTabPage_Text = "Искать";
@@ -187,6 +192,7 @@ namespace AntiDupl.NET.WinForms
             s.ResultsPreviewDuplPair_OpenBothFoldersButton_ToolTip_Text = "Откройте обе содержащие папки";
             s.ResultsPreviewDuplPair_OpenBothImagesButton_ToolTip_Text = "Откройте оба изображения";
             s.ResultsPreviewDuplPair_ExternDiffImagesButton_ToolTip_Text = "Открыть разницу изображений с помощью внешнего инструмента";
+            s.ResultsPreviewDuplPair_ExternDiffImages2Button_ToolTip_Text = "Открыть разницу изображений с помощью второго внешнего инструмента";
 
             s.ResultsPreviewDefect_DeleteButton_ToolTip_Text = "Удалить картинку";
             s.ResultsPreviewDefect_MistakeButton_ToolTip_Text = "Пометить текущий результат как ошибочный";
@@ -213,6 +219,10 @@ namespace AntiDupl.NET.WinForms
             s.ResultRowSetter_MirrorTurn_90_Icon_ToolTip_Text = "Горизонтально отраженный и повернутый на 90°";
             s.ResultRowSetter_MirrorTurn_180_Icon_ToolTip_Text = "Горизонтально отраженный и повернутый на 180°";
             s.ResultRowSetter_MirrorTurn_270_Icon_ToolTip_Text = "Горизонтально отраженный и повернутый на 270°";
+
+            s.ResultRowSetter_Difference_HardLink_ToolTip_Text = "Жесткие ссылки: оба имени - один файл";
+            s.ResultRowSetter_Difference_ByteIdentical_ToolTip_Text = "Одинаковые файлы";
+            s.ResultRowSetter_Difference_PixelIdentical_ToolTip_Text = "Одинаковые изображения, файлы различаются";
 
             s.ResultsListView_Type_Column_Text = "Тип";
             s.ResultsListView_Group_Column_Text = "Группа";

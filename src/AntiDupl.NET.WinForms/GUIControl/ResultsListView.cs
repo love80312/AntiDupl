@@ -178,10 +178,10 @@ namespace AntiDupl.NET.WinForms
                 ColumnHeadersDefaultCellStyle.SelectionBackColor = SystemColors.Control;
                 ColumnHeadersDefaultCellStyle.SelectionForeColor = ThemeColors.Text;
                 DefaultCellStyle.ForeColor = ThemeColors.Text;
-                DefaultCellStyle.SelectionBackColor = ThemeColors.Selection;
-                DefaultCellStyle.SelectionForeColor = ThemeColors.SelectionText;
                 GridColor = SystemColors.ControlDark;
             }
+            DefaultCellStyle.SelectionBackColor = ThemeColors.GridSelection;
+            DefaultCellStyle.SelectionForeColor = ThemeColors.GridSelectionText;
             ReadOnly = true;
             ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
             DoubleBuffered = true;
@@ -381,6 +381,12 @@ namespace AntiDupl.NET.WinForms
                     {
                         var result = m_results[m_currentRowIndex];
                         ImageDiffOpener.OpenFiles(result.first.path, result.second.path, m_options.imageDiffExecutablePath, m_options.imageDiffExecutableArguments);
+                    }
+                    else if (hotKey == m_options.hotKeyOptions.Get(HotKeyOptions.Action.OpenImageDiff2)
+                        && !string.IsNullOrEmpty(m_options.imageDiff2ExecutablePath))
+                    {
+                        var result = m_results[m_currentRowIndex];
+                        ImageDiffOpener.OpenFiles(result.first.path, result.second.path, m_options.imageDiff2ExecutablePath, m_options.imageDiff2ExecutableArguments);
                     }
                     return;
                 }

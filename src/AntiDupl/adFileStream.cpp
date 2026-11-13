@@ -149,6 +149,10 @@ namespace ad
 			Load(pixelData.average);
 			Load(pixelData.varianceSquare);
 		}
+		if(m_version > 5)
+			Load(pixelData.pixelHash);
+		if(m_version > 6)
+			Load(pixelData.color, COLOR_DATA_SIZE);
 	}
 
 	void TInputFileStream::Load(TImageData & imageData) const
@@ -157,6 +161,9 @@ namespace ad
 		Load(imageData.defect);
 		Load(imageData.crc32c);
 		Load(imageData.data->filled);
+		// The image database loads every record into the same object: a record
+		// without pixel data must not keep the previous record's hash.
+		imageData.data->pixelHash = 0;
 		if(imageData.data->filled)
 			Load(*imageData.data);
 		if(m_version < 5)
@@ -168,6 +175,14 @@ namespace ad
 			imageData.data->filled = false;
 			imageData.blockiness = -1;
 			imageData.blurring = -1;
+		}
+		else if(m_version < 7)
+		{
+			// Version 5 has no hash of the decoded pixels, which the
+			// comparers need to tell pixel-identical images from merely
+			// similar ones; version 6 has a bilinear reduced image and no
+			// colour thumbnail. The image is decoded again.
+			imageData.data->filled = false;
 		}
 	}
 
@@ -280,6 +295,8 @@ namespace ad
 		Save(pixelData.main, pixelData.size);
 		Save(pixelData.average);
 		Save(pixelData.varianceSquare);
+		Save(pixelData.pixelHash);
+		Save(pixelData.color, COLOR_DATA_SIZE);
 	}
 
 	// Сохранение в потоке изображения

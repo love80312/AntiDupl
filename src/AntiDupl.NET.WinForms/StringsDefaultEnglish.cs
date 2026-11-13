@@ -90,15 +90,18 @@ namespace AntiDupl.NET.WinForms
             s.CoreOptionsForm_CompareTabPage_Text = "Compare";
             s.CoreOptionsForm_CheckOnEqualityCheckBox_Text = "Search image dupls";
             s.CoreOptionsForm_TransformedImageCheckBox_Text = "Search rotated and mirror image dupls";
+            s.CoreOptionsForm_ShiftedImageCheckBox_Text = "Search shifted image dupls";
             s.CoreOptionsForm_SizeControlCheckBox_Text = "Control image size";
             s.CoreOptionsForm_TypeControlCheckBox_Text = "Control image type";
             s.CoreOptionsForm_RatioControlCheckBox_Text = "Control image width/height ratio";
             s.CoreOptionsForm_AlgorithmComparingLabeledComboBox_Text = "Algorithm of comparing of images";
             s.CoreOptionsForm_AlgorithmComparingLabeledComboBox_SquaredSum = "Mean square difference";
+            s.CoreOptionsForm_AlgorithmComparingLabeledComboBox_LocalColor = "Local colour difference";
             s.CoreOptionsForm_ThresholdDifferenceLabeledComboBox_Text = "Threshold difference";
             s.CoreOptionsForm_MinimalImageSizeLabeledIntegerEdit_Text = "Minimal image width/height";
             s.CoreOptionsForm_MaximalImageSizeLabeledIntegerEdit_Text = "Maximal image width/height";
             s.CoreOptionsForm_CompareInsideOneSearchPathCheckBox_Text = "Compare images from one path of search with one another";
+            s.CoreOptionsForm_SkipHardlinksCheckBox_Text = "Do not compare hardlinked duplicates";
             s.CoreOptionsForm_CompareInsideOneFolderCheckBox_Text = "Compare images inside one directory";
 
             s.CoreOptionsForm_DefectTabPage_Text = "Defects";
@@ -138,6 +141,8 @@ namespace AntiDupl.NET.WinForms
             s.CoreOptionsForm_ImageDiffTabPage_Text = "Image Difftool";
             s.CoreOptionsForm_ImageDiffExecutablePathLabeledStringEdit_Text = "Executable path:";
             s.CoreOptionsForm_ImageDiffExecutableArgumentsLabeledStringEdit_Text = "Executable arguments (given by \"%1\" \"%2\"):";
+            s.CoreOptionsForm_ImageDiff2ExecutablePathLabeledStringEdit_Text = "Second tool, executable path:";
+            s.CoreOptionsForm_ImageDiff2ExecutableArgumentsLabeledStringEdit_Text = "Second tool, executable arguments (given by \"%1\" \"%2\"):";
 
             s.CorePathsForm_Text = "Paths";
             s.CorePathsForm_SearchTabPage_Text = "Search";
@@ -187,6 +192,7 @@ namespace AntiDupl.NET.WinForms
             s.ResultsPreviewDuplPair_OpenBothFoldersButton_ToolTip_Text = "Open both containing folders";
             s.ResultsPreviewDuplPair_OpenBothImagesButton_ToolTip_Text = "Open both images";
             s.ResultsPreviewDuplPair_ExternDiffImagesButton_ToolTip_Text = "Open image difference with external tool";
+            s.ResultsPreviewDuplPair_ExternDiffImages2Button_ToolTip_Text = "Open image difference with the second external tool";
 
             s.ResultsPreviewDefect_DeleteButton_ToolTip_Text = "Delete picture";
             s.ResultsPreviewDefect_MistakeButton_ToolTip_Text = "Mark current result as a mistake";
@@ -214,6 +220,10 @@ namespace AntiDupl.NET.WinForms
             s.ResultRowSetter_MirrorTurn_180_Icon_ToolTip_Text = "Horizontally flipped and rotated on 180°";
             s.ResultRowSetter_MirrorTurn_270_Icon_ToolTip_Text = "Horizontally flipped and rotated on 270°";
 
+            s.ResultRowSetter_Difference_HardLink_ToolTip_Text = "Hard links: both names are one file";
+            s.ResultRowSetter_Difference_ByteIdentical_ToolTip_Text = "Identical files";
+            s.ResultRowSetter_Difference_PixelIdentical_ToolTip_Text = "Identical images, the files differ";
+
             s.ResultsListView_Type_Column_Text = "Type";
             s.ResultsListView_Group_Column_Text = "Group";
             s.ResultsListView_GroupSize_Column_Text = "Size of group";
@@ -238,7 +248,7 @@ namespace AntiDupl.NET.WinForms
             s.ResultsListView_FirstBlockiness_Column_Text = "1: Blockiness";
             s.ResultsListView_FirstBlurring_Column_Text = "1: Blurring";
             s.ResultsListView_FirstFileSize_Column_Text = "1: Size";
-            s.ResultsListView_FirstFileTime_Column_Text = "1: First Date modified";
+            s.ResultsListView_FirstFileTime_Column_Text = "1: Date modified";
             s.ResultsListView_SecondFileName_Column_Text = "2: Name";
             s.ResultsListView_SecondFileDirectory_Column_Text = "2: In folder";
             s.ResultsListView_SecondImageSize_Column_Text = "2: Dimensions";
