@@ -202,7 +202,7 @@
   <MainStatusStrip_SelectedLabel_Text>已選取： </MainStatusStrip_SelectedLabel_Text>
   <MainMenu_FileMenuItem_Text>檔案</MainMenu_FileMenuItem_Text>
   <MainMenu_File_OpenProfileMenuItem_Text>開啟搜尋設定檔</MainMenu_File_OpenProfileMenuItem_Text>
-<MainMenu_File_SaveProfileAsMenuItem_Text>另存搜尋設定檔</MainMenu_File_SaveProfileAsMenuItem_Text>
+  <MainMenu_File_SaveProfileAsMenuItem_Text>另存搜尋設定檔</MainMenu_File_SaveProfileAsMenuItem_Text>
   <MainMenu_File_LoadProfileOnLoadingMenuItem_Text>載入時載入設定檔</MainMenu_File_LoadProfileOnLoadingMenuItem_Text>
   <MainMenu_File_SaveProfileOnClosingMenuItem_Text>關閉時儲存設定檔</MainMenu_File_SaveProfileOnClosingMenuItem_Text>
   <MainMenu_File_ExitMenuItem_Text>結束</MainMenu_File_ExitMenuItem_Text>
