@@ -61,23 +61,30 @@ namespace ad
         virtual void Add(TImageDataPtr pImageData) = 0; // pure virtual or abstract function and requires to be overwritten in an derived class
         virtual void Compare(TImageDataPtr pOriginal, TImageDataPtr pTransformed, adTransformType transform) = 0;
 		virtual bool IsDuplPair(TImageDataPtr pFirst, TImageDataPtr pSecond, double *pDifference); //виртуальная функция, но не обязательно ее переопределять
-
+        //Comparison of images with search of the optimal shift (shiftedImage option).
+        virtual bool ShiftedDifference(TImageDataPtr pFirst, TImageDataPtr pSecond, double *pDifference);
+        bool PassControls(TImageDataPtr pFirst, TImageDataPtr pSecond);
+        //Search of a nonzero shift of the reduced images that minimizes the squared difference.
+        bool FindShift(TImageDataPtr pFirst, TImageDataPtr pSecond, int &dx, int &dy);
         void AddToSet(Set &set, TImageDataPtr pImageData);
         void CompareWithSet(const Set &set, TImageDataPtr pOriginal, TImageDataPtr pTransformed, adTransformType transform);
 
+        TUInt8* m_pMask;      //mask of the central comparison area (ignoreFrameWidth)
+        int m_fastThreshold;  //threshold for the 4x4 fast signature
         // A metric's value for two images, made 0 exactly when their decoded
         // pixels are the same: reduced images can be equal for images that
         // differ, which then get MIN_DIFFERENCE_OF_DIFFERENT_PIXELS at least.
         static double PixelDifference(TImageDataPtr pFirst, TImageDataPtr pSecond, double metric);
 
     private:
+        //Comparison of an image pair without shift and (if enabled) with shift compensation; the smaller difference is kept.
+        bool IsDuplPairAny(TImageDataPtr pFirst, TImageDataPtr pSecond, double *pDifference);
+
         TResultStorage *m_pResult;
         TImageData *m_pTransformedImageData;
         TUInt8* m_pBuffer;
-        TUInt8* m_pMask;
 
         int m_mainThreshold;
-        int m_fastThreshold;
         int m_maxDifference;
         size_t m_mainSize;
     };
@@ -142,10 +149,35 @@ namespace ad
         virtual void Add(TImageDataPtr pImageData);
         virtual void Compare(TImageDataPtr pOriginal, TImageDataPtr pTransformed, adTransformType transform);
 		virtual bool IsDuplPair(TImageDataPtr pFirst, TImageDataPtr pSecond, double *pDifference);
+        virtual bool ShiftedDifference(TImageDataPtr pFirst, TImageDataPtr pSecond, double *pDifference);
 
     private:
 		double C1;
 		double C2;
+    };
+    //-------------------------------------------------------------------------
+    // Local colour difference: the colour thumbnails split into
+    // COLOR_BLOCK_SIZE square blocks, each block's RMS difference over its
+    // pixels and B, G, R, and the worst block as the difference, in percent
+    // of 255. A change confined to a small area counts in full, and so does
+    // a change of colour that keeps the brightness.
+    class TImageComparer_LocalColor : public TImageComparer
+    {
+    public:
+        TImageComparer_LocalColor(TEngine *pEngine);
+
+    protected:
+        virtual void Add(TImageDataPtr pImageData);
+        virtual void Compare(TImageDataPtr pOriginal, TImageDataPtr pTransformed, adTransformType transform);
+        virtual bool IsDuplPair(TImageDataPtr pFirst, TImageDataPtr pSecond, double *pDifference);
+        // None here: the base's shift search measures the grey reduced images
+        // in mean square's percents, which aren't this comparer's differences.
+        virtual bool ShiftedDifference(TImageDataPtr pFirst, TImageDataPtr pSecond, double *pDifference);
+
+    private:
+        size_t m_frameBlocks; // blocks left out along each edge (Ignore frame width)
+        uint64_t m_blockThreshold; // a block's squared-difference sum above this fails the pair
+        int m_fastCellThreshold; // so does a fast-data cell difference above this
     };
     //-------------------------------------------------------------------------
     TImageComparer* CreateImageComparer(TEngine *pEngine);

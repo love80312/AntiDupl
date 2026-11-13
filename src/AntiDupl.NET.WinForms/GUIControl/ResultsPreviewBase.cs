@@ -68,6 +68,7 @@ namespace AntiDupl.NET.WinForms
             m_toolStrip.RenderMode = ToolStripRenderMode.System;
             m_toolStrip.Renderer = new CustomToolStripSystemRenderer();
             m_toolStrip.AutoSize = true;
+            m_toolStrip.AllowClickThrough = true; // one click on an inactive window, as in MainToolStrip
 
             m_toolStripPanel = new ToolStripPanel();
             m_toolStripPanel.BackColor = SystemColors.Control;
@@ -145,7 +146,7 @@ namespace AntiDupl.NET.WinForms
         
         protected string GetToolTip(string toolTip, Keys hotKey)
         {
-            return string.Concat(toolTip, string.Format(" ({0})", hotKey));
+            return string.Concat(toolTip, string.Format(" ({0})", HotKeyOptions.Text(hotKey)));
         }
 
         protected string GetToolTip(string toolTip, HotKeyOptions.Action action)

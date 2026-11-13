@@ -301,15 +301,17 @@ namespace AntiDupl.NET.Core.Original
         {
             public int checkOnEquality;
             public int transformedImage;
+            public int shiftedImage;
             public int sizeControl;
             public int typeControl;
             public int ratioControl;
-            public int thresholdDifference;
+            public double thresholdDifference;
             public int minimalImageSize;
             public int maximalImageSize;
             public int compareInsideOneFolder;
             public int compareInsideOneSearchPath;
             public AlgorithmComparing algorithmComparing;
+            public int skipHardlinks;
         }
 
         [StructLayout(LayoutKind.Sequential)]

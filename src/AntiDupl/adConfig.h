@@ -87,6 +87,7 @@ namespace ad
     const TUInt32 PIXEL_MAX_DIFFERENCE = 0xFF;
     const TUInt32 FAST_IMAGE_SIZE = 4;
     const size_t FAST_DATA_SIZE = FAST_IMAGE_SIZE*FAST_IMAGE_SIZE;
+    const int SHIFT_COARSE_FACTOR = 6;               //admissible threshold excess at the coarse stage of the shift compensation search
     const TUInt8 JPEG_FILE_MARKER = 0xFF;
     const TUInt8 JPEG_FILE_MARKER_END = 0xD9;
     const TInt32 RATIO_THRESHOLD_DIFFERENCE = 1;
@@ -96,12 +97,20 @@ namespace ad
     // The least difference of images whose decoded pixels differ: their
     // reduced images can be equal, which would give 0.
     const double MIN_DIFFERENCE_OF_DIFFERENT_PIXELS = 0.0001;
+    // Two names of one file: below every real difference, so the pair sorts
+    // first. The program shows it as HL (DifferenceFormat).
+    const double HARD_LINK_DIFFERENCE = -1;
     const TUInt32 D0_SEARCHED_FILE_NUMBER_MAX = 1000;
     const TUInt32 D1_SEARCHED_FILE_NUMBER_MAX = 10000;
     const TUInt32 D3_THRESHOLD_DIFFERENCE_MAX = TUInt32(DENOMINATOR*0.100);
     const TUInt32 D3_MAX_RANGES_STEP = TUInt32(DENOMINATOR*0.010);
     const TUInt32 INITIAL_REDUCED_IMAGE_SIZE = 256;
     const TUInt32 REDUCED_IMAGE_SIZE_MIN = 16;
+    // The colour thumbnail the local colour comparer reads: COLOR_IMAGE_SIZE
+    // square, B, G, R bytes, compared in COLOR_BLOCK_SIZE square blocks.
+    const size_t COLOR_IMAGE_SIZE = 64;
+    const size_t COLOR_BLOCK_SIZE = 4;
+    const size_t COLOR_DATA_SIZE = COLOR_IMAGE_SIZE*COLOR_IMAGE_SIZE*3;
     const TUInt32 COLLECT_THREAD_QUEUE_SIZE_MAX = 16;
     const TUInt32 DEAFAULT_THREAD_SLEEP_INTERVAL = 10;
     const TUInt32 LARGE_IMAGE_COLLECTION_SIZE_MIN = 100000;
@@ -111,7 +120,9 @@ namespace ad
 	// so their cached pixel data, blockiness and blurring are recomputed.
 	// Version 6: the image database stores a hash of the decoded pixels;
 	// images from an older database are decoded again for it.
-	const TUInt32 FILE_VERSION = 6;
+	// Version 7: the reduced image is area-averaged instead of bilinear, and
+	// the database stores a colour thumbnail; older records are decoded again.
+	const TUInt32 FILE_VERSION = 7;
 	const size_t SIZE_CHECK_LIMIT = 2147483646; //string.max_size()
 
 	const size_t BLOCKINESS_SIZE = 8;

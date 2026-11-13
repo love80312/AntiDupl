@@ -90,15 +90,18 @@ namespace AntiDupl.NET.WinForms
             s.CoreOptionsForm_CompareTabPage_Text = "Compare";
             s.CoreOptionsForm_CheckOnEqualityCheckBox_Text = "Search image dupls";
             s.CoreOptionsForm_TransformedImageCheckBox_Text = "Search rotated and mirror image dupls";
+            s.CoreOptionsForm_ShiftedImageCheckBox_Text = "Search shifted image dupls";
             s.CoreOptionsForm_SizeControlCheckBox_Text = "Control image size";
             s.CoreOptionsForm_TypeControlCheckBox_Text = "Control image type";
             s.CoreOptionsForm_RatioControlCheckBox_Text = "Control image width/height ratio";
             s.CoreOptionsForm_AlgorithmComparingLabeledComboBox_Text = "Algorithm of comparing of images";
             s.CoreOptionsForm_AlgorithmComparingLabeledComboBox_SquaredSum = "Mean square difference";
+            s.CoreOptionsForm_AlgorithmComparingLabeledComboBox_LocalColor = "Local colour difference";
             s.CoreOptionsForm_ThresholdDifferenceLabeledComboBox_Text = "Threshold difference";
             s.CoreOptionsForm_MinimalImageSizeLabeledIntegerEdit_Text = "Minimal image width/height";
             s.CoreOptionsForm_MaximalImageSizeLabeledIntegerEdit_Text = "Maximal image width/height";
             s.CoreOptionsForm_CompareInsideOneSearchPathCheckBox_Text = "Compare images from one path of search with one another";
+            s.CoreOptionsForm_SkipHardlinksCheckBox_Text = "Do not compare hardlinked duplicates";
             s.CoreOptionsForm_CompareInsideOneFolderCheckBox_Text = "Compare images inside one directory";
 
             s.CoreOptionsForm_DefectTabPage_Text = "Defects";
@@ -217,6 +220,7 @@ namespace AntiDupl.NET.WinForms
             s.ResultRowSetter_MirrorTurn_180_Icon_ToolTip_Text = "Horizontally flipped and rotated on 180°";
             s.ResultRowSetter_MirrorTurn_270_Icon_ToolTip_Text = "Horizontally flipped and rotated on 270°";
 
+            s.ResultRowSetter_Difference_HardLink_ToolTip_Text = "Hard links: both names are one file";
             s.ResultRowSetter_Difference_ByteIdentical_ToolTip_Text = "Identical files";
             s.ResultRowSetter_Difference_PixelIdentical_ToolTip_Text = "Identical images, the files differ";
 
@@ -244,7 +248,7 @@ namespace AntiDupl.NET.WinForms
             s.ResultsListView_FirstBlockiness_Column_Text = "1: Blockiness";
             s.ResultsListView_FirstBlurring_Column_Text = "1: Blurring";
             s.ResultsListView_FirstFileSize_Column_Text = "1: Size";
-            s.ResultsListView_FirstFileTime_Column_Text = "1: First Date modified";
+            s.ResultsListView_FirstFileTime_Column_Text = "1: Date modified";
             s.ResultsListView_SecondFileName_Column_Text = "2: Name";
             s.ResultsListView_SecondFileDirectory_Column_Text = "2: In folder";
             s.ResultsListView_SecondImageSize_Column_Text = "2: Dimensions";

@@ -304,6 +304,7 @@
     <!-- ==== Compare (подписи) ==== -->
     <v:String x:Key="configurationWindow_checkOnEquality">Искать дублирующие картинки</v:String>
     <v:String x:Key="configurationWindow_transformedImage">Искать повернутые и зеркальные дубликаты</v:String>
+    <v:String x:Key="configurationWindow_shiftedImage">Искать дубликаты со сдвигом изображения</v:String>
     <v:String x:Key="configurationWindow_sizeControl">Учитывать размер картинок</v:String>
     <v:String x:Key="configurationWindow_typeControl">Учитывать тип картинок</v:String>
     <v:String x:Key="configurationWindow_ratioControl">Учитывать соотношение ширины/высоты картинок</v:String>
@@ -313,6 +314,7 @@
     <v:String x:Key="configurationWindow_maximalImageSize">Максимальная ширина/высота картинок</v:String>
     <v:String x:Key="configurationWindow_compareInsideOneFolder">Сравнивать картинки внутри одного каталога</v:String>
     <v:String x:Key="configurationWindow_compareInsideOneSearchPath">Сравнивать картинки из одного пути поиска друг с другом</v:String>
+    <v:String x:Key="configurationWindow_skipHardlinks">Не сравнивать жесткие ссылки на один файл</v:String>
 
     <!-- ==== Advanced (подписи) ==== -->
     <v:String x:Key="configurationWindow_deleteToRecycleBin">Удалять в корзину</v:String>
@@ -346,6 +348,7 @@
     <!-- ==== Tooltips: Compare ==== -->
     <v:String x:Key="configurationWindow_tooltip_checkOnEquality">Искать дубликаты картинок (идентичные или почти идентичные).</v:String>
     <v:String x:Key="configurationWindow_tooltip_transformedImage">Искать также дубликаты, повёрнутые или зеркально отражённые относительно оригинала.</v:String>
+    <v:String x:Key="configurationWindow_tooltip_shiftedImage">Искать также дубликаты, смещённые относительно оригинала.</v:String>
     <v:String x:Key="configurationWindow_tooltip_sizeControl">Считать картинки разными, если их размер в пикселях (ширина/высота) отличается.</v:String>
     <v:String x:Key="configurationWindow_tooltip_typeControl">Считать картинки разными, если у них разный формат (тип) файла.</v:String>
     <v:String x:Key="configurationWindow_tooltip_ratioControl">Считать картинки разными, если у них разное соотношение ширины/высоты.</v:String>
@@ -355,6 +358,7 @@
     <v:String x:Key="configurationWindow_tooltip_maximalImageSize">Картинки с шириной или высотой больше этого значения (px) не ищутся.</v:String>
     <v:String x:Key="configurationWindow_tooltip_compareInsideOneFolder">Сравнивать картинки только внутри одного каталога.</v:String>
     <v:String x:Key="configurationWindow_tooltip_compareInsideOneSearchPath">Сравнивать картинки между собой только в пределах одного пути поиска.</v:String>
+    <v:String x:Key="configurationWindow_tooltip_skipHardlinks">Жесткие ссылки - это несколько имен одного файла, поэтому такая пара не показывается.</v:String>
 
     <!-- ==== Tooltips: Advanced ==== -->
     <v:String x:Key="configurationWindow_tooltip_deleteToRecycleBin">При удалении картинок перемещать их в корзину, а не удалять безвозвратно.</v:String>
