@@ -1,34 +1,34 @@
-﻿/*
+/*
 * AntiDupl.NET Program (http://ermig1979.github.io/AntiDupl).
 *
 * Copyright (c) 2002-2018 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
+using System.Runtime.CompilerServices;
 using AntiDupl.NET.Core.Original;
 
 namespace AntiDupl.NET.Core
-{   /// <summary>
+{
+    /// <summary>
     /// Contains advanced options for AntiDupl core processing.
     /// </summary>
     public class CoreAdvancedOptions : INotifyPropertyChanged
@@ -37,20 +37,50 @@ namespace AntiDupl.NET.Core
         /// Specifies whether deleted files are moved to the Recycle Bin.
         /// </summary>
         public bool deleteToRecycleBin;
+
+        /// <summary>
+        /// Specifies whether the mistake database is enabled.
+        /// </summary>
         public bool mistakeDataBase;
+
+        /// <summary>
+        /// Specifies the resolution ratio setting used by the core.
+        /// </summary>
         public int ratioResolution;
+
         /// <summary>
         /// Specifies the number of threads used to compare images.
         /// </summary>
         public int compareThreadCount;
+
+        /// <summary>
+        /// Specifies the number of threads used to collect image data.
+        /// </summary>
         public int collectThreadCount;
+
+        /// <summary>
+        /// Specifies the reduced image size used during processing.
+        /// </summary>
         public int reducedImageSize;
+
         /// <summary>
         /// Specifies the maximum size of the undo queue.
         /// </summary>
         public int undoQueueSize;
+
+        /// <summary>
+        /// Specifies the maximum number of comparison results.
+        /// </summary>
         public int resultCountMax;
+
+        /// <summary>
+        /// Specifies the frame width ignored during processing.
+        /// </summary>
         public int ignoreFrameWidth;
+
+        /// <summary>
+        /// Specifies whether libjpeg-turbo is used for JPEG processing.
+        /// </summary>
         public bool useLibJpegTurbo;
 
         public CoreAdvancedOptions()
@@ -106,6 +136,9 @@ namespace AntiDupl.NET.Core
 
         public bool Equals(CoreAdvancedOptions advancedOptions)
         {
+            if (advancedOptions == null)
+                return false;
+
             return
                 deleteToRecycleBin == advancedOptions.deleteToRecycleBin &&
                 mistakeDataBase == advancedOptions.mistakeDataBase &&
@@ -125,7 +158,7 @@ namespace AntiDupl.NET.Core
             set
             {
                 ratioResolution = value;
-                NotifyPropertyChanged("RatioResolution");
+                NotifyPropertyChanged();
             }
         }
 
@@ -135,7 +168,7 @@ namespace AntiDupl.NET.Core
             set
             {
                 compareThreadCount = value;
-                NotifyPropertyChanged("CompareThreadCount");
+                NotifyPropertyChanged();
             }
         }
 
@@ -145,7 +178,7 @@ namespace AntiDupl.NET.Core
             set
             {
                 collectThreadCount = value;
-                NotifyPropertyChanged("CollectThreadCount");
+                NotifyPropertyChanged();
             }
         }
 
@@ -155,7 +188,7 @@ namespace AntiDupl.NET.Core
             set
             {
                 reducedImageSize = value;
-                NotifyPropertyChanged("ReducedImageSize");
+                NotifyPropertyChanged();
             }
         }
 
@@ -165,7 +198,7 @@ namespace AntiDupl.NET.Core
             set
             {
                 resultCountMax = value;
-                NotifyPropertyChanged("ResultCountMax");
+                NotifyPropertyChanged();
             }
         }
 
@@ -175,23 +208,15 @@ namespace AntiDupl.NET.Core
             set
             {
                 ignoreFrameWidth = value;
-                NotifyPropertyChanged("IgnoreFrameWidth");
+                NotifyPropertyChanged();
             }
         }
 
-        #region Члены INotifyPropertyChanged
-
         public event PropertyChangedEventHandler PropertyChanged;
 
-        // This method is called by the Set accessor of each property.
-        // The CallerMemberName attribute that is applied to the optional propertyName
-        // parameter causes the property name of the caller to be substituted as an argument.
-        private void NotifyPropertyChanged(string propertyName)
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        #endregion
     }
 }
