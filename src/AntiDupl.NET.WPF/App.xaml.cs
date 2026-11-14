@@ -22,9 +22,6 @@ namespace AntiDupl.NET.WPF
     {
         static ServiceProvider _serviceProvider;
 
-        /// <summary>Диалог «GPU недоступен» показывается один раз за запуск.</summary>
-        static bool _gpuFallbackShown;
-
         public App()
         {
             Startup += Application_Startup;
@@ -52,7 +49,7 @@ namespace AntiDupl.NET.WPF
                    new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
 
-            // Стандартное логирование (ILogger) в файл: <BaseDirectory>\logs
+            // Стандартное логирование (ILogger) в файл: <BaseDirectory>\\logs
             FileLoggerProvider fileLogProvider =
                 new FileLoggerProvider(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs"));
 
@@ -64,9 +61,8 @@ namespace AntiDupl.NET.WPF
                 builder.AddProvider(fileLogProvider);
             });
 
-            // CLI: -s <dir> — кастомный user path (зеркало WF Program.cs); иначе — дефолтный.
-            // ВАЖНО: UserPath задаётся до ConfigurationModel.Load() — файлы настроек
-            // читаются из user\ (ранее — относительный путь в CWD).
+            // CLI: -s <dir> — custom user path; иначе используется каталог по умолчанию.
+            // UserPath задаётся до ConfigurationModel.Load(), чтобы настройки читались правильно.
             string customSavePath = GetParameter(e.Args, "-s");
             if (customSavePath != null)
             {
@@ -88,72 +84,27 @@ namespace AntiDupl.NET.WPF
 
             services.AddSingleton<IUndoRedoEngine, UndoRedoEngine>();
             services.AddSingleton<IViewModeModel, ViewModeModel>();
-            // Синхронизация списков путей (search/ignore/valid/delete) UI → ядро (окно путей).
             services.AddSingleton<ICoreLocationSync, CoreLibLocationSync>();
 
-            // Deep (DINOv2) поиск: C#-пайплайн (AntiDupl.NET.Deep).
-            // Модели: рядом с бинарником <BaseDirectory>\models (DINOv2 — путь или
-            // пользовательский URL, LightGlue — авто-скачивание); кэш эмбеддингов/вердиктов:
-            // в user-каталоге <UserPath>\deep (данные пользователя: выживает clean-ом,
-            // переносится вместе с -s <dir>); логи deep-пайплайна — в общий каталог logs.
-            // (решение пользователя: модели — не в user-каталоге, чтобы -s <dir>
-            // переносил только данные, а не гигабайты весов).
+            // Deep (DINOv2) search. This build uses CPU-only ONNX Runtime; GPU fallback UI is disabled.
             services.AddDeepSearch(
                 () =>
                 {
-                    // Единственный источник раскладки моделей: DeepModelManager.GetModelsDirectory
-                    // (рядом с бинарником — модели одинаковы для всех пользователей).
                     string modelsDirectory = AntiDupl.NET.Deep.Infra.DeepModelManager.GetModelsDirectory(AppContext.BaseDirectory);
                     Directory.CreateDirectory(modelsDirectory);
-                    // Кэш — в user-каталоге (dev: %LOCALAPPDATA%, release: рядом с exe):
-                    // это данные пользователя, а не артефакт сборки.
                     string cacheDirectory = Path.Combine(AntiDupl.NET.WPF.Resources.Resources.UserPath, "deep");
                     Directory.CreateDirectory(cacheDirectory);
                     string logDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
                     return (ModelsDirectory: modelsDirectory, CacheDirectory: cacheDirectory, LogDirectory: logDirectory);
                 },
-                // Уведомление (окно выбора каталогов CUDA/cuDNN на UI-потоке), если GPU
-                // недоступен и поиск идёт на CPU; текст дублируется в deep.log.
-                // Диалог показывается один раз за запуск (хук вызывается на обе модели).
-                message =>
-                {
-                    try
-                    {
-                        if (_gpuFallbackShown)
-                            return;
-                        _gpuFallbackShown = true;
-                        Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            IConfigurationModel configuration =
-                                _serviceProvider.GetRequiredService<IConfigurationModel>();
-                            var window = new GpuFallbackWindow(configuration);
-                            if (window.ShowDialog() == true)
-                            {
-                                // Пути вступают в силу после перезапуска (PATH выставляется
-                                // на старте, нативные DLL ORT уже загружены).
-                                configuration.CudaPath = window.CudaPath;
-                                configuration.CudnnPath = window.CudnnPath;
-                                configuration.Save();
-                                MessageBox.Show(LocalizationHelper.S("gpufallback_restart"),
-                                    LocalizationHelper.S("gpufallback_title"),
-                                    MessageBoxButton.OK, MessageBoxImage.Information);
-                            }
-                        }));
-                    }
-                    catch
-                    {
-                        // UI недоступен — сообщение остаётся в deep.log.
-                    }
-                });
+                _ => { });
 
             services.AddSingleton<MainViewModel>();
 
             _serviceProvider = services.BuildServiceProvider();
             ServiceLocator.Provider = _serviceProvider;
 
-            // Повреждённые файлы настроек: лог + сообщение пользователю.
-            // SerializeHelper сам диалог не показывает (аудит зеркала WF: диалог → событие) —
-            // обработка здесь, в UI-слое.
+            // 損毀的設定檔：寫入記錄並通知使用者。
             Helper.SerializeHelperEvents.LoadErrorOccurred += (s, e) =>
             {
                 if (_serviceProvider != null)
@@ -169,54 +120,17 @@ namespace AntiDupl.NET.WPF
 
             ILoggerFactory loggerFactory = _serviceProvider.GetRequiredService<ILoggerFactory>();
             loggerFactory.CreateLogger<App>()
-                .LogInformation("Запуск приложения. Лог: {LogPath}", fileLogProvider.LogFilePath);
+                .LogInformation("Запуск приложения. Log: {LogPath}", fileLogProvider.LogFilePath);
 
             MainViewModel viewModel = _serviceProvider.GetRequiredService<MainViewModel>();
 
-            // Каталог лога deep-пайплайна задаётся в resolvePaths (FileDeepLogger
-            // регистрируется в AddDeepSearch); статический DeepLog удалён.
-
-            // CUDA/cuDNN (как в оригинале): каталоги bin из Configuration → Deep добавляются
-            // в начало PATH процесса ДО первой загрузки нативного ORT (первый deep-поиск).
-            AddCudaPaths(viewModel.Configuration, loggerFactory.CreateLogger<App>());
-
+            // CPU-only build: do not prepend legacy CUDA/cuDNN paths to the process PATH.
+            // The old properties remain in ConfigurationModel for configuration.xml compatibility.
             var shell = new MainWindow();
             shell.DataContext = viewModel;
             shell.Loaded += new RoutedEventHandler(viewModel.OnLoaded);
             shell.Closing += new CancelEventHandler(viewModel.OnClosing);
             shell.Show();
-        }
-
-        /// <summary>
-        /// Как в оригинальном DinoDuplicateSearch (App.AddCudaPaths): каталоги bin CUDA/cuDNN
-        /// из Configuration → Deep добавляются в начало PATH процесса. Вызывается на старте,
-        /// до первой загрузки ONNX Runtime (CUDA EP ищет cudart/cublas/cudnn через PATH).
-        /// После изменения путей требуется перезапуск приложения.
-        /// </summary>
-        static void AddCudaPaths(IConfigurationModel configuration, ILogger log)
-        {
-            try
-            {
-                System.Collections.Generic.List<string> paths = new System.Collections.Generic.List<string>();
-                if (!string.IsNullOrWhiteSpace(configuration.CudaPath))
-                    paths.Add(configuration.CudaPath.Trim());
-                if (!string.IsNullOrWhiteSpace(configuration.CudnnPath))
-                    paths.Add(configuration.CudnnPath.Trim());
-
-                if (paths.Count == 0)
-                {
-                    log.LogInformation("CUDA/cuDNN: пути не заданы (если ORT не найдёт их сам, поиск пойдёт на CPU)");
-                    return;
-                }
-
-                string currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
-                Environment.SetEnvironmentVariable("PATH", string.Join(";", paths) + ";" + currentPath);
-                log.LogInformation("CUDA/cuDNN: добавлено в PATH: {Paths}", string.Join(" | ", paths));
-            }
-            catch (Exception ex)
-            {
-                log.LogWarning(ex, "CUDA/cuDNN: не удалось установить PATH");
-            }
         }
 
         void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
