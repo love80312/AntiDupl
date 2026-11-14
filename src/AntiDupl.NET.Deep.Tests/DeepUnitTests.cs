@@ -94,6 +94,49 @@ public sealed class DeepUnitTests
     }
 
     [Fact]
+    public void FeatureCache_saveOnlyWritesModifiedCacheFile()
+    {
+        var wgcDir = TestCacheDir();
+        var embeddingDir = TestCacheDir();
+        try
+        {
+            using (var cache = new FeatureCache(wgcDir))
+            {
+                cache.SetWgc(
+                    Path.Combine(wgcDir, "a.jpg"),
+                    Path.Combine(wgcDir, "b.jpg"),
+                    1.0,
+                    2.0,
+                    0.5f,
+                    true,
+                    12f,
+                    1.0f,
+                    4,
+                    4);
+                cache.Save();
+            }
+
+            Assert.True(File.Exists(Path.Combine(wgcDir, "deep_wgc.dat")));
+            Assert.False(File.Exists(Path.Combine(wgcDir, "deep_embeddings.dat")));
+
+            var imagePath = WriteTempImage(embeddingDir, "a.jpg", new byte[] { 1, 2, 3 });
+            using (var cache = new FeatureCache(embeddingDir))
+            {
+                cache.SetEmbedding(imagePath, MtimeUtcSeconds(imagePath), new float[] { 0.25f, 0.5f });
+                cache.Save();
+            }
+
+            Assert.True(File.Exists(Path.Combine(embeddingDir, "deep_embeddings.dat")));
+            Assert.False(File.Exists(Path.Combine(embeddingDir, "deep_wgc.dat")));
+        }
+        finally
+        {
+            try { Directory.Delete(wgcDir, recursive: true); } catch { }
+            try { Directory.Delete(embeddingDir, recursive: true); } catch { }
+        }
+    }
+
+    [Fact]
     public void FeatureCache_invaliatesOnMtimeChange()
     {
         var dir = TestCacheDir();
@@ -106,7 +149,7 @@ public sealed class DeepUnitTests
             cache.SetEmbedding(path, MtimeUtcSeconds(path), vec);
             Assert.NotNull(cache.GetEmbedding(path));
 
-            // «Изменили» файл — mtime прыгает дальше допустимых 0.01 с.
+            // «Изменили» файл — mtime прыгает дальше допустимого 0.01 с.
             File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddMinutes(5));
             Assert.Null(cache.GetEmbedding(path));
         }

@@ -70,7 +70,10 @@ public sealed class FeatureCache : IFeatureCache
     private readonly Dictionary<string, EmbeddingEntry> _embeddings = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<(string P1, string P2, float MinScore), WgcEntry> _wgc = new();
     private readonly Dictionary<string, DeepFileStats> _fileStats = new(StringComparer.OrdinalIgnoreCase);
-    private bool _dirty;
+
+    // Separate dirty flags avoid rewriting/compressing an unrelated large cache file.
+    private bool _embeddingsDirty;
+    private bool _wgcDirty;
 
     public FeatureCache(string directory)
     {
@@ -128,7 +131,7 @@ public sealed class FeatureCache : IFeatureCache
 
             var entry = new EmbeddingEntry { Size = size, Mtime = mtime, Embedding = embedding };
             _embeddings[path] = entry;
-            _dirty = true;
+            _embeddingsDirty = true;
         }
     }
 
@@ -168,7 +171,7 @@ public sealed class FeatureCache : IFeatureCache
                 AngleVotes = angleVotes,
                 ScaleVotes = scaleVotes
             };
-            _dirty = true;
+            _wgcDirty = true;
         }
     }
 
@@ -214,10 +217,15 @@ public sealed class FeatureCache : IFeatureCache
             _wgc.Clear();
             _fileStats.Clear();
 
+            // Both dictionaries changed, so both files must be replaced.
+            _embeddingsDirty = true;
+            _wgcDirty = true;
+
             WriteEmbeddings();
+            _embeddingsDirty = false;
             WriteWgc();
+            _wgcDirty = false;
             WriteFileStats();
-            _dirty = false;
         }
         return freed;
     }
@@ -231,10 +239,17 @@ public sealed class FeatureCache : IFeatureCache
     {
         lock (_gate)
         {
-            if (!_dirty) return;
-            WriteEmbeddings();
-            WriteWgc();
-            _dirty = false;
+            if (_embeddingsDirty)
+            {
+                WriteEmbeddings();
+                _embeddingsDirty = false;
+            }
+
+            if (_wgcDirty)
+            {
+                WriteWgc();
+                _wgcDirty = false;
+            }
         }
     }
 

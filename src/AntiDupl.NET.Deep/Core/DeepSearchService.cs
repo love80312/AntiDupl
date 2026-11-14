@@ -223,13 +223,21 @@ public class DeepSearchService : IDisposable
             {
                 if (ct.IsCancellationRequested)
                     break;
+
+                // The first image is compared against every later image in this row.
+                // Keep only this one grayscale tensor: it saves repeated base-image
+                // decoding without retaining the whole cluster in memory.
+                float[,]? baseGray = null;
+                bool baseGrayDecoded = false;
+
                 for (int j = i + 1; j < items.Count; j++)
                 {
                     var sim = DotProduct(clusterEmbs[i], clusterEmbs[j]);
 
                     if (settings.GeometricCheckEnabled)
                     {
-                        var (ok, angle, scale, angleVotes, scaleVotes) = VerifyGeometric(items[i], items[j]);
+                        var (ok, angle, scale, angleVotes, scaleVotes) =
+                            VerifyGeometric(items[i], items[j], ref baseGray, ref baseGrayDecoded);
 
                         int done = Interlocked.Increment(ref pairCount);
                         var b1 = Path.GetFileName(items[i]);
@@ -425,15 +433,11 @@ public class DeepSearchService : IDisposable
         return _extractor;
     }
 
-
-
-
-
-
-
-
-
-    private (bool ok, float angle, float scale, int angleVotes, int scaleVotes) VerifyGeometric(string path1, string path2)
+    private (bool ok, float angle, float scale, int angleVotes, int scaleVotes) VerifyGeometric(
+        string path1,
+        string path2,
+        ref float[,]? baseGray,
+        ref bool baseGrayDecoded)
     {
         var mtime1 = GetMtime(path1);
         var mtime2 = GetMtime(path2);
@@ -445,14 +449,19 @@ public class DeepSearchService : IDisposable
             return (cached.Value.result, cached.Value.angle, cached.Value.scale, cached.Value.angleVotes, cached.Value.scaleVotes);
         }
 
-        // Декодирование grayscale 800×600 через ядро (adLoadBitmapW) вместо OpenCV.
-        float[,]? gray1 = _imageSource.DecodeLightGlueInput(path1);
-        float[,]? gray2 = _imageSource.DecodeLightGlueInput(path2);
+        // Reuse the left-hand image for all pairs in this outer-loop row.
+        // Only one 800×600 tensor is retained, keeping memory bounded on large clusters.
+        if (!baseGrayDecoded)
+        {
+            baseGray = _imageSource.DecodeLightGlueInput(path1);
+            baseGrayDecoded = true;
+        }
 
-        if (gray1 == null || gray2 == null)
+        float[,]? gray2 = _imageSource.DecodeLightGlueInput(path2);
+        if (baseGray == null || gray2 == null)
             return (false, 0, 0, 0, 0);
 
-        var (ok, angle, scale, angleVotes, scaleVotes) = _currentVerifier!.Verify(gray1, gray2, _minMatchScore);
+        var (ok, angle, scale, angleVotes, scaleVotes) = _currentVerifier!.Verify(baseGray, gray2, _minMatchScore);
         _logger.Write($"[PAIR] {_currentVerifier.Name}: votes={angleVotes}/{scaleVotes} backend={LastVerificationBackend}");
 
         try { _cache.SetWgc(path1, path2, mtime1, mtime2, _minMatchScore, ok, angle, scale, angleVotes, scaleVotes); }
@@ -500,8 +509,6 @@ public class DeepSearchService : IDisposable
         for (int i = 0; i < a.Length; i++) sum += a[i] * b[i];
         return sum;
     }
-
-
 
     public void Dispose()
     {

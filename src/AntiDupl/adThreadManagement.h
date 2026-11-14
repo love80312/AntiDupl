@@ -64,7 +64,14 @@ namespace ad
         TPop Pop(TImageData **ppImageData);
 
         size_t Id() const {return m_threadId;}
-        size_t Size() const {return m_pQueue->size();}
+
+        // Queue::size() is not safe while another thread mutates the queue.
+        // Use the same critical section as Push() and Pop().
+        size_t Size() const
+        {
+            TCriticalSection::TLocker locker(m_pCS);
+            return m_pQueue->size();
+        }
 
     private:
         volatile size_t m_threadId;
@@ -132,7 +139,7 @@ namespace ad
         struct TThread
         {
             TThreadTask *task;
-			ad::TThread *thread;
+            ad::TThread *thread;
         };
         typedef std::vector<TThread> TThreads;
     public:
@@ -187,7 +194,7 @@ namespace ad
 
     private:
         TCompareManager *m_pCompareManager;
-        
+
         size_t GetThreadId() const;
     };
     //-------------------------------------------------------------------------
