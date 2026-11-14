@@ -3,54 +3,55 @@ using System;
 namespace AntiDupl.NET.Deep.Models;
 
 /// <summary>
-/// Параметры deep-поиска (перенос SearchSettings референс-проекта).
-/// Каталог/фильтры задаёт ядро AntiDupl.dll (ScanCandidates), здесь — только параметры ML-пайплайна.
+/// Deep 搜尋參數。候選路徑與一般搜尋篩選仍由 AntiDupl.dll 核心處理。
+/// 預設值針對低階 CPU（例如雙核心 i3）調整；高負載舊設定也會在 setter 中限幅。
 /// </summary>
 public class DeepSettings
 {
-    /// <summary>
-    /// Порог расстояния (1 − косинусное сходство) для объявления изображений дубликатами.
-    /// WPF передаёт пороговую разность в процентах: 45% → 0.45 (дефолт референс-проекта).
-    /// </summary>
+    /// <summary>重複判定距離（1 - cosine similarity）。</summary>
     public float DistanceThreshold { get; set; } = 0.45f;
 
-    /// <summary>Включена ли геометрическая верификация пар (SuperPoint + LightGlue).</summary>
-    /// <summary>Верификация пар SuperPoint+LightGlue. Дефолт true — как в оригинале (SearchSettings).</summary>
+    /// <summary>是否啟用 SuperPoint + LightGlue 幾何驗證。</summary>
     public bool GeometricCheckEnabled { get; set; } = true;
 
-    /// <summary>Минимальное сходство пары для включения в верифицированную группу (аналог MinSimilarityForPair).</summary>
+    /// <summary>納入已驗證群組的最低相似度。</summary>
     public float MinSimilarityForPair { get; set; } = 0.5f;
 
-    /// <summary>Минимальная средняя уверенность совпадений LightGlue (аналог MinMatchScore).</summary>
+    /// <summary>LightGlue 匹配的最低平均信心分數。</summary>
     public float MinMatchScore { get; set; } = 0.6f;
 
-    /// <summary>Размер батча DINOv2-инференса.</summary>
-    public int BatchSize { get; set; } = 32;
+    private int _batchSize = 2;
 
-    /// <summary>Глубина очереди предзагрузки батчей (0 — последовательно).</summary>
-    public int PrefetchCount { get; set; } = 2;
+    /// <summary>DINOv2 推論批次大小；此低負載設定最多允許 2 張。</summary>
+    public int BatchSize
+    {
+        get => _batchSize;
+        set => _batchSize = Math.Clamp(value, 1, 2);
+    }
 
-    /// <summary>Максимальный размер кластера; большие кластеры распускаются на одиночные метки.</summary>
+    /// <summary>預載佇列深度；此 CPU 設定固定關閉預載，以避免額外並行工作。</summary>
+    public int PrefetchCount
+    {
+        get => 0;
+        set { _ = value; }
+    }
+
+    /// <summary>最大群組大小；更大的群組會拆成單張圖片。</summary>
     public int MaxClusterSize { get; set; } = 50;
 
-    /// <summary>Доля порога, ниже которой связь считается «сильной» (проходит транзитивно).</summary>
+    /// <summary>傳遞式群組合併比例。</summary>
     public float TransitivityRatio { get; set; } = 0.7f;
 
-    /// <summary>Параллелизм верификации пар.</summary>
-    /// <summary>Параллелизм WGC-верификации (0 = авто: половина процессоров).</summary>
-    public int WgcParallelism { get; set; } = Math.Max(1, Environment.ProcessorCount / 2);
+    /// <summary>LightGlue 驗證平行度；此低負載設定固定為 1。</summary>
+    public int WgcParallelism
+    {
+        get => 1;
+        set { _ = value; }
+    }
 
-    /// <summary>
-    /// Полный путь к модели DINOv2-base (resolves хостом: DeepModelManager.
-    /// ResolveDinov2Path — кастомный путь из Configuration или дефолтный models-каталог).
-    /// Если файла нет — поиск не запускается (см. DeepSearchService.GetExtractor).
-    /// </summary>
+    /// <summary>DINOv2-base ONNX 模型完整路徑。</summary>
     public string? Dinov2ModelPath { get; set; }
 
-    /// <summary>
-    /// Полный путь к сжатой модели SuperPoint+LightGlue (resolves хостом).
-    /// Пусто/нет файла — верификация пропускается (режим «без верификации»). Задаётся
-    /// только при включённой верификации; скачивание при отсутствии — обязанность хоста.
-    /// </summary>
+    /// <summary>SuperPoint + LightGlue ONNX 模型完整路徑。</summary>
     public string? LightGlueModelPath { get; set; }
 }

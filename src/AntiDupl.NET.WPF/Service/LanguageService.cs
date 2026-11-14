@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using AntiDupl.NET.WPF.Command;
@@ -16,10 +13,9 @@ namespace AntiDupl.NET.WPF.Service
 {
     class LanguageService : ILanguageService
     {
-        //Евент для оповещения всех окон приложения
         public event EventHandler LanguageChanged;
 
-        IConfigurationModel _config;
+        private readonly IConfigurationModel _config;
 
         public LanguageService(IConfigurationModel config)
         {
@@ -27,135 +23,118 @@ namespace AntiDupl.NET.WPF.Service
 
             foreach (LanguageEnum value in Enum.GetValues(typeof(LanguageEnum)))
             {
-                LanguageViewModel myClass = new LanguageViewModel();
-                myClass.Enum = value;
-                myClass.IsChecked = value == LanguageEnum.Russian ? true : false; //check value is last
-                myClass.Title = Enum.GetName(typeof(LanguageEnum), value);
-                _languageCollection.Add(myClass);
+                _languageCollection.Add(new LanguageViewModel
+                {
+                    Enum = value,
+                    IsChecked = value == LanguageEnum.English,
+                    Title = GetLanguageTitle(value)
+                });
             }
+
             if (_config != null)
             {
-                Language = _config.Language.ToCultureInfo();
-                LanguageEnum langEnum = GetLanguageEnumFromCulture(Language);
-                SetCheckedForLanguageCollection(langEnum, LanguageCollection);
+                var culture = _config.Language?.ToCultureInfo() ?? new CultureInfo("en-US");
+                Language = culture;
+                SetCheckedForLanguageCollection(GetLanguageEnumFromCulture(culture), LanguageCollection);
             }
-            else //по умолчанию
-                Language = new CultureInfo("en-US");
-        }
-
-
-        ObservableCollection<LanguageViewModel> _languageCollection = new ObservableCollection<LanguageViewModel>();
-        public ObservableCollection<LanguageViewModel> LanguageCollection
-        {
-            get
+            else
             {
-                return _languageCollection;
+                Language = new CultureInfo("en-US");
             }
         }
 
-        ICommand _languageSelectedCommand;
+        private readonly ObservableCollection<LanguageViewModel> _languageCollection = new();
+
+        public ObservableCollection<LanguageViewModel> LanguageCollection => _languageCollection;
+
+        private ICommand _languageSelectedCommand;
         public ICommand LanguageSelectedCommand
         {
             get
             {
-                return _languageSelectedCommand ?? (_languageSelectedCommand = new RelayCommand(arg =>
+                return _languageSelectedCommand ??= new RelayCommand(arg =>
                 {
-                    LanguageEnum langEnum = (LanguageEnum)arg;
-                    SetCheckedForLanguageCollection(langEnum, LanguageCollection);
+                    if (arg is not LanguageEnum language)
+                        return;
 
-                    CultureInfo newLanguage = GetCultureFromLanguageEnum(langEnum);
+                    SetCheckedForLanguageCollection(language, LanguageCollection);
+                    CultureInfo newLanguage = GetCultureFromLanguageEnum(language);
                     if (_config != null)
                         _config.Language = SerializableCultureInfo.FromCultureInfo(newLanguage);
                     Language = newLanguage;
-                }));
+                });
             }
         }
 
-        private void SetCheckedForLanguageCollection(LanguageEnum langEnum, ObservableCollection<LanguageViewModel> collection)
+        private static string GetLanguageTitle(LanguageEnum language) => language switch
         {
-            LanguageViewModel theClass = collection.First<LanguageViewModel>(t => t.Enum == langEnum);
+            LanguageEnum.English => "English",
+            LanguageEnum.Russian => "Русский",
+            LanguageEnum.TraditionalChinese => "繁體中文",
+            _ => language.ToString()
+        };
 
-            // ok, they want to check this one, let them and uncheck all else
-            foreach (var iter in collection)
-            {
-                iter.IsChecked = false;
-            }
-            theClass.IsChecked = true;
-        }
-
-        private CultureInfo GetCultureFromLanguageEnum(LanguageEnum langEnum)
+        private static void SetCheckedForLanguageCollection(
+            LanguageEnum language,
+            ObservableCollection<LanguageViewModel> collection)
         {
-            switch (langEnum)
-            {
-                case LanguageEnum.English:
-                    return new CultureInfo("en-US");
-                case LanguageEnum.Russian:
-                    return new CultureInfo("ru-RU");
-            }
-            throw new ArgumentException("Неизвестное значение LanguageEnum " + langEnum);
+            foreach (var item in collection)
+                item.IsChecked = item.Enum == language;
         }
 
-        private LanguageEnum GetLanguageEnumFromCulture(CultureInfo culture)
+        private static CultureInfo GetCultureFromLanguageEnum(LanguageEnum language) => language switch
         {
-            switch (culture.Name)
-            {
-                case "en-US":
-                    return LanguageEnum.English;
-                case "ru-RU":
-                    return LanguageEnum.Russian;
-            }
-            throw new ArgumentException(String.Format("{0} нет в поддерживаемых языках", culture.Name));
-        }
+            LanguageEnum.English => new CultureInfo("en-US"),
+            LanguageEnum.Russian => new CultureInfo("ru-RU"),
+            LanguageEnum.TraditionalChinese => new CultureInfo("zh-TW"),
+            _ => throw new ArgumentOutOfRangeException(nameof(language), language, "Unsupported language")
+        };
+
+        private static LanguageEnum GetLanguageEnumFromCulture(CultureInfo culture) => culture.Name switch
+        {
+            "en-US" => LanguageEnum.English,
+            "ru-RU" => LanguageEnum.Russian,
+            "zh-TW" => LanguageEnum.TraditionalChinese,
+            _ => LanguageEnum.English
+        };
 
         public CultureInfo Language
         {
-            get
-            {
-                return System.Threading.Thread.CurrentThread.CurrentUICulture;
-            }
+            get => System.Threading.Thread.CurrentThread.CurrentUICulture;
             set
             {
-                if (value == null) throw new ArgumentNullException("value");
-                if (value == System.Threading.Thread.CurrentThread.CurrentUICulture) return;
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
 
-                //1. Меняем язык приложения:
+                // 即使 CurrentUICulture 已相同，也必須套用字典；Windows 系統語言可能
+                // 與使用者在 configuration.xml 中保存的語言相同，但資源字典尚未載入。
                 System.Threading.Thread.CurrentThread.CurrentUICulture = value;
 
-                //2. Создаём ResourceDictionary для новой культуры
                 ResourceDictionary dict = new ResourceDictionary();
-                switch (value.Name)
+                string dictionaryName = value.Name switch
                 {
-                    case "ru-RU":
-                        dict.Source = new Uri(String.Format("Resources/lang.{0}.xaml", value.Name), UriKind.Relative);
-                        break;
-                    default:
-                        dict.Source = new Uri("Resources/lang.xaml", UriKind.Relative);
-                        break;
-                }
+                    "ru-RU" => "Resources/lang.ru-RU.xaml",
+                    "zh-TW" => "Resources/lang.zh-TW.xaml",
+                    _ => "Resources/lang.xaml"
+                };
+                dict.Source = new Uri(dictionaryName, UriKind.Relative);
 
-                //3. Находим старую ResourceDictionary и удаляем его и добавляем новую ResourceDictionary
-                if (Application.Current.Resources.MergedDictionaries.Count > 0)
+                var dictionaries = Application.Current.Resources.MergedDictionaries;
+                ResourceDictionary oldDict = dictionaries.FirstOrDefault(d =>
+                    d.Source != null && d.Source.OriginalString.StartsWith("Resources/lang.", StringComparison.Ordinal));
+
+                if (oldDict != null)
                 {
-                    ResourceDictionary oldDict = (from d in Application.Current.Resources.MergedDictionaries
-                                                  where d.Source != null && d.Source.OriginalString.StartsWith("Resources/lang.")
-                                                  select d).FirstOrDefault();
-                    if (oldDict != null)
-                    {
-                        int ind = Application.Current.Resources.MergedDictionaries.IndexOf(oldDict);
-                        Application.Current.Resources.MergedDictionaries.Remove(oldDict);
-                        Application.Current.Resources.MergedDictionaries.Insert(ind, dict);
-                    }
-                    else
-                        Application.Current.Resources.MergedDictionaries.Add(dict);
+                    int index = dictionaries.IndexOf(oldDict);
+                    dictionaries.Remove(oldDict);
+                    dictionaries.Insert(index, dict);
                 }
                 else
                 {
-                    Application.Current.Resources.MergedDictionaries.Add(dict);
+                    dictionaries.Add(dict);
                 }
 
-                //4. Вызываем евент для оповещения всех окон.
-                if (LanguageChanged != null)
-                    LanguageChanged(Application.Current, new EventArgs());
+                LanguageChanged?.Invoke(Application.Current, EventArgs.Empty);
             }
         }
     }

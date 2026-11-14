@@ -29,23 +29,14 @@ namespace AntiDupl.NET.WPF.Model
             BadColor = Colors.LightCoral;
             AlternateColor = Colors.WhiteSmoke;
             FolderAreDiffrentColor = Colors.AliceBlue;
-
             Language = new SerializableCultureInfo("en-US");
         }
-
-        //public event EventHandler ConfigurationChanged;
 
         int _thumbnailWidth;
         public int ThumbnailWidth
         {
             get { return _thumbnailWidth; }
-            set
-            {
-                _thumbnailWidth = value;
-                //if (ConfigurationChanged != null)
-                //    ConfigurationChanged(this, EventArgs.Empty);.
-                RaisePropertyChangedEvent();
-            }
+            set { _thumbnailWidth = value; RaisePropertyChangedEvent(); }
         }
 
         ObservableCollection<Criterion> _criterions;
@@ -63,15 +54,11 @@ namespace AntiDupl.NET.WPF.Model
         void criterions_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.OldItems != null)
-            {
                 foreach (INotifyPropertyChanged item in e.OldItems)
                     item.PropertyChanged -= criterion_PropertyChanged;
-            }
             if (e.NewItems != null)
-            {
                 foreach (INotifyPropertyChanged item in e.NewItems)
                     item.PropertyChanged += criterion_PropertyChanged;
-            }
         }
 
         bool calculateInProgress = false;
@@ -100,7 +87,6 @@ namespace AntiDupl.NET.WPF.Model
                 Criterion cr = sender as Criterion;
                 if (cr.Weight > 1)
                     cr.Weight = 0.99M;
-
                 calculateInProgress = true;
                 SaatiHelper.RecalculateIndex(_criterions, cr);
                 calculateInProgress = false;
@@ -109,10 +95,7 @@ namespace AntiDupl.NET.WPF.Model
 
         public SerializableCultureInfo Language { get; set; }
 
-        // ==== Deep (DINOv2) search: configuration of the AntiDupl.NET.Deep pipeline ====
-
-        // Дефолт — true, как в оригинале (SearchSettings.GeometricCheckEnabled = true):
-        // без WGC-верификации DINOv2-кластеры возвращают кучу ложных пар.
+        // ==== Deep (DINOv2) search configuration ====
         bool _verifyByLightGlue = true;
         public bool VerifyByLightGlue
         {
@@ -141,8 +124,7 @@ namespace AntiDupl.NET.WPF.Model
             set { _dinov2ModelUrl = value; RaisePropertyChangedEvent(); }
         }
 
-        // Каталоги CUDA/cuDNN (как в оригинале: добавляются в PATH при старте, чтобы
-        // ONNX Runtime нашел cudart/cublas/cudnn). После изменения — перезапуск приложения.
+        // 舊版 GPU 設定保留供 XmlSerializer 讀取既有 configuration.xml；CPU-only 建置不使用。
         string _cudaPath = "";
         public string CudaPath
         {
@@ -156,11 +138,6 @@ namespace AntiDupl.NET.WPF.Model
             get { return _cudnnPath; }
             set { _cudnnPath = value; RaisePropertyChangedEvent(); }
         }
-
-        // ==== Параметры deep-пайплайна (паритет SearchSettings референс-проекта) ====
-        // Дефолты = оригинал, кроме MinMatchScore: 0.6 (осознанно строже оригинальных 0.5 —
-        // меньше мягких ложных пар); WgcParallelism: 0 = авто (processor count / 2).
-        // Старые configuration.xml без этих элементов: XmlSerializer оставит дефолты.
 
         double _deepMinSimilarityForPair = 0.5;
         public double DeepMinSimilarityForPair
@@ -183,11 +160,11 @@ namespace AntiDupl.NET.WPF.Model
             set { _deepTransitivityRatio = value; RaisePropertyChangedEvent(); }
         }
 
-        int _deepWgcParallelism = 0;
+        // 雙核心 CPU：LightGlue 工作階段一次只執行一組影像。
         public int DeepWgcParallelism
         {
-            get { return _deepWgcParallelism; }
-            set { _deepWgcParallelism = value; RaisePropertyChangedEvent(); }
+            get => 1;
+            set { _ = value; }
         }
 
         double _deepMinMatchScore = 0.6;
@@ -197,103 +174,47 @@ namespace AntiDupl.NET.WPF.Model
             set { _deepMinMatchScore = value; RaisePropertyChangedEvent(); }
         }
 
-        // Производительность пайплайна (паритет SearchSettings оригинала: batchSize=32, prefetch=2).
-        int _deepBatchSize = 32;
+        // BatchSize 最多為 2；舊設定檔中的 32 等高值會在反序列化時自動限幅。
+        int _deepBatchSize = 2;
         public int DeepBatchSize
         {
             get { return _deepBatchSize; }
-            set { _deepBatchSize = value; RaisePropertyChangedEvent(); }
+            set { _deepBatchSize = Math.Clamp(value, 1, 2); RaisePropertyChangedEvent(); }
         }
 
-        int _deepPrefetchCount = 2;
+        // CPU-only 低負載設定關閉預載佇列，並兼容舊設定檔中的欄位。
         public int DeepPrefetchCount
         {
-            get { return _deepPrefetchCount; }
-            set { _deepPrefetchCount = value; RaisePropertyChangedEvent(); }
+            get => 0;
+            set { _ = value; }
         }
 
         public string LastResultFile { get; set; }
-
-        /// <summary>
-        /// Регулярное выражение — фильтр имён файлов для ignore-списка путей
-        /// (зеркало WF options.xml → ignoreFilenameFilter).
-        /// </summary>
         public string IgnoreFilenameFilter { get; set; }
-
-        /// <summary>
-        /// Вид таблицы результатов (пары/группы) — восстанавливается при перезапуске
-        /// и сохраняется в configuration.xml при смене режима.
-        /// </summary>
         public ViewMode ResultsViewMode { get; set; } = ViewMode.Pair;
-
-        /// <summary>
-        /// Горячие клавиши (зеркало WF options.xml → hotKeyOptions).
-        /// </summary>
         public HotKeyOptions HotKeys { get; set; }
-
-        /// <summary>
-        /// Видимость колонок таблицы результатов. null = все колонки видимы.
-        /// Сохраняется при закрытии окна, применяется при загрузке.
-        /// </summary>
         public ResultsColumnsOptions ResultsColumns { get; set; }
-
-        // Выбранный режим поиска (тулбар). null = не выбирался — по умолчанию DINOv2
-        // (если ядро поддерживает). Сохраняется в configuration.xml.
         public AlgorithmComparing? CompareAlgorithm { get; set; }
-
         public uint UndoRedoStackSize { get; set; }
-
         public uint MaxCachedThumbnail { get; set; }
-
-
-        /// <summary>
-        /// При загрузке результата проверять существование файлов (лог прогресс-окна,
-        /// зеркало WF options.xml → checkResultsAtLoading).
-        /// </summary>
         public bool CheckResultsAtLoading { get; set; } = true;
-
-        /// <summary>
-        /// При загрузке результата фильтровать пары из ignore-списка (лог прогресс-окна,
-        /// зеркало WF options.xml → checkMistakesAtLoading).
-        /// </summary>
         public bool CheckMistakesAtLoading { get; set; } = true;
-
-        /// <summary>
-        /// Путь к внешней diff-утилите (зеркало WF imageDiffExecutablePath).
-        /// </summary>
         public string ImageDiffExecutablePath { get; set; }
-
-        /// <summary>
-        /// Аргументы внешней diff-утилиты, плейсхолдеры %1/%2
-        /// (зеркало WF imageDiffExecutableArguments).
-        /// </summary>
         public string ImageDiffExecutableArguments { get; set; }
-
-        /// <summary>
-        /// Использовать только один путь поиска (зеркало WF options.xml → onePath):
-        /// в ядро передаётся только первый путь из списка search-путей.
-        /// </summary>
         public bool UseSinglePath { get; set; }
 
         Color _goodColor;
         public Color GoodColor
         {
             get { return _goodColor; }
-            set
-            {
-                _goodColor = value;
-                RaisePropertyChangedEvent();
-            }
+            set { _goodColor = value; RaisePropertyChangedEvent(); }
         }
+
         Color _badColor;
         public Color BadColor
         {
             get { return _badColor; }
-            set
-            {
-                _badColor = value;
-                RaisePropertyChangedEvent();
-            }
+            set { _badColor = value; RaisePropertyChangedEvent(); }
         }
 
         Color _alternateColor;
@@ -311,57 +232,40 @@ namespace AntiDupl.NET.WPF.Model
         public Color FolderAreDiffrentColor
         {
             get { return _folderAreDiffrentColor; }
-            set
-            {
-                _folderAreDiffrentColor = value;
-                RaisePropertyChangedEvent();
-            }
+            set { _folderAreDiffrentColor = value; RaisePropertyChangedEvent(); }
         }
 
-		bool _loadResultOnOpen = true;
-		public bool LoadResultOnOpen
-		{
-			get { return _loadResultOnOpen; }
-			set
-			{
-				_loadResultOnOpen = value;
-				RaisePropertyChangedEvent();
-			}
-		}
-
-		bool _saveResultOnClose = true;
-		public bool SaveResultOnClose
-		{
-			get { return _saveResultOnClose; }
-			set
-			{
-				_saveResultOnClose = value;
-				RaisePropertyChangedEvent();
-			}
-		}
-
-        public Brush AlternateBrush
+        bool _loadResultOnOpen = true;
+        public bool LoadResultOnOpen
         {
-            get { return new SolidColorBrush(_alternateColor); }
+            get { return _loadResultOnOpen; }
+            set { _loadResultOnOpen = value; RaisePropertyChangedEvent(); }
         }
+
+        bool _saveResultOnClose = true;
+        public bool SaveResultOnClose
+        {
+            get { return _saveResultOnClose; }
+            set { _saveResultOnClose = value; RaisePropertyChangedEvent(); }
+        }
+
+        public Brush AlternateBrush => new SolidColorBrush(_alternateColor);
 
         public static ConfigurationModel Load()
         {
-            //return new ConfigurationModel();
-
             ConfigurationModel model = SerializeHelper<ConfigurationModel>.Load(GetFilePath());
             if (model == null)
-            {
                 model = new ConfigurationModel();
-            }
-            if (model.Criterions == null || model.Criterions.Count != 5)
-            {
-                model.Criterions = model.GetDefaultCriterions();
-            }
 
+            if (model.Criterions == null || model.Criterions.Count != 5)
+                model.Criterions = model.GetDefaultCriterions();
             if (model.HotKeys == null)
                 model.HotKeys = new HotKeyOptions();
 
+            // 保險處理舊版 configuration.xml，確保實際使用值與介面顯示值一致。
+            model.DeepBatchSize = model.DeepBatchSize;
+            model.DeepPrefetchCount = 0;
+            model.DeepWgcParallelism = 1;
             return model;
         }
 
@@ -376,12 +280,8 @@ namespace AntiDupl.NET.WPF.Model
             return criterions;
         }
 
-        public void Save()
-        {
-            SerializeHelper<ConfigurationModel>.Save(this, GetFilePath());
-        }
+        public void Save() => SerializeHelper<ConfigurationModel>.Save(this, GetFilePath());
 
-        /// <summary>Полный путь: пользовательские данные — в <c>user\</c> (зеркало WF UserPath).</summary>
-        static string GetFilePath() => Path.Combine(AntiDupl.NET.WPF.Resources.Resources.UserPath, _fileName);
+        static string GetFilePath() => Path.Combine(Resources.UserPath, _fileName);
     }
 }

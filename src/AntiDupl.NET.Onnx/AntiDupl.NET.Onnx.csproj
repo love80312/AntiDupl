@@ -15,10 +15,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <!-- Проект — перенос из DinoDuplicateSearchWPF (net8.0), анализаторы отключены -->
     <AnalysisMode>None</AnalysisMode>
     <Authors>ErmIg;Gigas002</Authors>
-    <Description>ONNX Runtime layer: session factory (GPU→CPU fallback) and model runners (DINOv2, SuperPoint+LightGlue). Единственный носитель пакета Microsoft.ML.OnnxRuntime.</Description>
+    <Description>CPU-only ONNX Runtime layer for DINOv2 and SuperPoint+LightGlue.</Description>
     <Copyright>ErmIg © 2002-2023</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
@@ -47,12 +46,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- ORT: единый пакет с GPU (CUDA) + CPU фолбэком. Стабильная линия,
-         как в референс-проекте DinoDuplicateSearchWPF (там 1.21.x). -->
-    <!-- Та же версия ORT, что в оригинале (1.21.x → CUDA 12 / cuDNN 8),
-         чтобы GPU-сценарий воспроизводился точно как в референсе.
-         Пакет живёт только здесь: AntiDupl.NET.Deep зависит от этой сборки, а не от ORT. -->
-    <PackageReference Include="Microsoft.ML.OnnxRuntime.Gpu" Version="1.21.*" />
+    <!-- CPU package only: no CUDA, cuDNN, or TensorRT execution provider. -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.21.*" />
   </ItemGroup>
 
   <ItemGroup>

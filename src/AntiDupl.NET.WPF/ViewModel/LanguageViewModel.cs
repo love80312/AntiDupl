@@ -1,36 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace AntiDupl.NET.WPF.ViewModel
 {
     public enum LanguageEnum
     {
         English = 1,
-        Russian = 2
+        Russian = 2,
+        TraditionalChinese = 3
     }
 
     public class LanguageViewModel : PropertyChangedBase
     {
-        public LanguageViewModel()
-        {
-            IsChecked = false;
-        }
+        private bool _isChecked;
 
         public LanguageEnum Enum { get; set; }
-        private bool _isChecked = false;
 
         public bool IsChecked
         {
-            get { return _isChecked; }
+            get => _isChecked;
             set
             {
+                if (_isChecked == value) return;
                 _isChecked = value;
                 RaisePropertyChangedEvent();
             }
-
         }
 
         public string Title { get; set; }

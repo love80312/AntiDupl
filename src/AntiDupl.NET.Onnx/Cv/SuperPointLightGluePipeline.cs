@@ -8,20 +8,8 @@ using Microsoft.ML.OnnxRuntime.Tensors;
 namespace AntiDupl.NET.Onnx.Cv;
 
 /// <summary>
-/// Сжатый (fused) пайплайн SuperPoint + LightGlue (fabio-sim/LightGlue-ONNX v2.0).
-/// Перенос SuperPointLightGluePipeline из DinoDuplicateSearch.CV (без OpenCV).
-///
-/// Вход: <c>images</c> (2,1,H,W) float — два grayscale-кадра 0..1 одного размера.
-/// В гибридном порте кадры всегда 800×600 (максимум модели, оба числа кратны 8 —
-/// padding не нужен): ядро AntiDupl.dll декодирует и уменьшает изображение
-/// (IDeepImageSource.DecodeLightGlueInput).
-///
-/// Вывод: keypoints (2,1024,2) int64, matches (M,3) int64 [batchIdx,kpIdx0,kpIdx1],
-/// mscores (M) float. Берутся совпадения с kpIdx0/kpIdx1 ≥ 0 и score &gt; 0.1.
-///
-/// ВНИМАНИЕ: InferenceSession ORT (особенно с CUDA EP) не потокобезопасна при
-/// параллельных Run() — весь Match сериализован через _sessionGate (и защищает
-/// ленивую загрузку модели), как в референс-проекте.
+/// SuperPoint + LightGlue 融合模型管線。
+/// CPU-only 建置透過 OnnxSessionFactory 使用 ONNX Runtime CPU execution provider。
 /// </summary>
 public class SuperPointLightGluePipeline : IDisposable
 {
@@ -52,14 +40,12 @@ public class SuperPointLightGluePipeline : IDisposable
     private void LoadModel()
     {
         if (_session != null) return;
-        // Единая фабрика сессий: надёжный GPU→CPU fallback (в ORT 1.21 отсутствие CUDA
-        // бросает на CreateSession) + явное уведомление хоста — как у DINOv2-раннера.
+
         var session = OnnxSessionFactory.CreateSession(_modelPath, _logger, _onGpuFallback);
         _session = session;
-        if (session.IsGpu)
-            _logger.Write("[WGC] LightGlue pipeline: GPU (CUDA)");
-        else
-            _logger.Write("[WGC] LightGlue pipeline: CPU fallback (CUDA недоступен)");
+        _logger.Write(session.IsGpu
+            ? "[WGC] LightGlue pipeline: GPU (CUDA)"
+            : "[WGC] LightGlue pipeline: CPU-only ONNX Runtime");
 
         var inputName = _session.Session.InputMetadata.Keys.First();
         var outputNames = _session.Session.OutputMetadata.Keys.ToList();
@@ -67,9 +53,8 @@ public class SuperPointLightGluePipeline : IDisposable
     }
 
     /// <summary>
-    /// Совмещение двух grayscale-кадров (оба 600×800, 0..1).
-    /// Возвращает (matches=[kpIdx0,kpIdx1][], scores, keypoints0, keypoints1) —
-    /// ключевые точки в координатах входа модели (800×600).
+    /// 比對兩張灰階影像（600×800，像素範圍 0..1）。
+    /// 回傳匹配索引、分數及兩張圖片的關鍵點座標。
     /// </summary>
     public (int[][] matches, float[] scores, float[,] keypoints0, float[,] keypoints1) Match(
         float[,] gray0, float[,] gray1)
@@ -80,7 +65,6 @@ public class SuperPointLightGluePipeline : IDisposable
 
             int h = _inputHeight;
             int w = _inputWidth;
-
             Debug.Assert(gray0.GetLength(0) == h && gray0.GetLength(1) == w,
                 "gray0 must be letterboxed to the model input size");
             Debug.Assert(gray1.GetLength(0) == h && gray1.GetLength(1) == w,
@@ -100,9 +84,6 @@ public class SuperPointLightGluePipeline : IDisposable
             };
 
             using var results = _session!.Session.Run(inputs);
-
-            // Фьюжн-модель обязана вернуть все три выхода — иначе First(r => r.Name == ...) ниже
-            // упадёт с неинформативным исключением.
             Debug.Assert(results.Any(r => r.Name == "keypoints")
                 && results.Any(r => r.Name == "matches")
                 && results.Any(r => r.Name == "mscores"),
@@ -114,7 +95,6 @@ public class SuperPointLightGluePipeline : IDisposable
             var matchTensor = results.First(r => r.Name == "matches").AsTensor<long>();
             var scoreTensor = results.First(r => r.Name == "mscores").AsTensor<float>();
 
-            // Extract keypoints for each image
             int numKps = kpsTensor.Dimensions[1];
             var kp0 = new float[numKps, 2];
             var kp1 = new float[numKps, 2];
@@ -126,7 +106,6 @@ public class SuperPointLightGluePipeline : IDisposable
                 kp1[k, 1] = kpsTensor[1, k, 1];
             }
 
-            // Extract matches
             int numMatches = matchTensor.Dimensions[0];
             var matches = new List<int[]>();
             var scores = new List<float>();
@@ -149,8 +128,6 @@ public class SuperPointLightGluePipeline : IDisposable
     public void Dispose()
     {
         lock (_sessionGate)
-        {
             _session?.Dispose();
-        }
     }
 }
