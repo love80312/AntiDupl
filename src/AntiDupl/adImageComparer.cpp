@@ -602,7 +602,7 @@ namespace ad
         float varianceSquare2 = fabs(float(squareSum2)/area - average2*average2);
         float sigmaOfBoth = float(correlationSum)/area - average1*average2;
 
-        float res = (2*average1*average2 + C1)*(2*sigmaOfBoth + C2)/
+        double res = (2*average1*average2 + C1)*(2*sigmaOfBoth + C2)/
             ((average1*average1 + average2*average2 + C1)*(varianceSquare1 + varianceSquare2 + C2));
         if(res > 2 || res < -2)
             return false;
