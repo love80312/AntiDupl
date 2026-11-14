@@ -282,6 +282,6 @@ namespace AntiDupl.NET.WPF.Model
 
         public void Save() => SerializeHelper<ConfigurationModel>.Save(this, GetFilePath());
 
-        static string GetFilePath() => Path.Combine(Resources.UserPath, _fileName);
+        static string GetFilePath() => Path.Combine(AntiDupl.NET.WPF.Resources.Resources.UserPath, _fileName);
     }
 }
