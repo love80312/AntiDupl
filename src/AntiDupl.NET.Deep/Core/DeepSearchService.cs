@@ -454,7 +454,7 @@ public class DeepSearchService : IDisposable
         if (!baseGrayDecoded)
         {
             baseGray = _imageSource.DecodeLightGlueInput(path1);
-            baseGrayDecoded = true;
+            baseGrayDecoded = baseGray != null;
         }
 
         float[,]? gray2 = _imageSource.DecodeLightGlueInput(path2);
