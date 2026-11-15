@@ -1,0 +1,51 @@
+
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:v="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Comparator -->
+    <v:String x:Key="comparatorWindow_Previous">Предыдущая</v:String>
+    <v:String x:Key="comparatorWindow_Next">Следующая</v:String>
+    <v:String x:Key="comparatorWindow_Resolution">Разрешение</v:String>
+    <v:String x:Key="comparatorWindow_FileSize">Размер файла</v:String>
+    <v:String x:Key="comparatorWindow_Blockiness">Блочность</v:String>
+    <v:String x:Key="comparatorWindow_Blurring">Размытие</v:String>
+    <v:String x:Key="comparatorWindow_UtilityIndex">Индекс полезности</v:String>
+
+    <!-- Configurable action -->
+    <v:String x:Key="configurableActionWindow_LabelAction">Действие</v:String>
+    <v:String x:Key="configurableActionWindow_LabelFilterConditions">Условия фильтрации</v:String>
+    <v:String x:Key="configurableActionWindow_GroupDirectory">Папка</v:String>
+    <v:String x:Key="configurableActionWindow_GroupBestSelectingByImageProperties">Выбор лучшего изображения по свойствам</v:String>
+    <v:String x:Key="configurableActionWindow_GroupBestSelectingByFilePath">Выбор лучшего изображения по пути к файлу</v:String>
+    <v:String x:Key="configurableActionWindow_LabelAlgorithmForNumber">Алгоритм получения номера из имени файла</v:String>
+    <v:String x:Key="configurableActionWindow_ButtonPreview">Предпросмотр</v:String>
+    <v:String x:Key="configurableActionWindow_LabelSelectedItem">Выбранный элемент</v:String>
+    <v:String x:Key="configurableActionWindow_ContextOpenComparator">Открыть сравнение</v:String>
+    <v:String x:Key="configurableActionWindow_ContextShowDifferenceInPercent">Показать разницу в процентах</v:String>
+    <v:String x:Key="configurableActionWindow_ColumnFiles">Файлы</v:String>
+    <v:String x:Key="configurableActionWindow_ColumnBestImage">Лучшее изображение</v:String>
+    <v:String x:Key="configurableActionWindow_ColumnBestByPath">Лучшее по пути</v:String>
+    <v:String x:Key="configurableActionWindow_ColumnConfigurableAction">Настраиваемое действие</v:String>
+    <v:String x:Key="configurableActionWindow_LabelTotal">Всего</v:String>
+    <v:String x:Key="configurableActionWindow_ButtonGo">Запустить</v:String>
+
+    <!-- Priorities -->
+    <v:String x:Key="prioritiesWindow_button_SetDefault">Восстановить значения по умолчанию</v:String>
+    <v:String x:Key="prioritiesWindow_button_OK">ОК</v:String>
+
+    <!-- LightGlue -->
+    <v:String x:Key="configurationWindow_deepLightGlueModelUpToDate">Модель LightGlue уже актуальна: {0}</v:String>
+    <v:String x:Key="configurationWindow_deepLightGlueModelDownloading">Загрузка модели LightGlue… {0}</v:String>
+    <v:String x:Key="configurationWindow_deepLightGlueModelDownloaded">Модель LightGlue загружена: {0}</v:String>
+    <v:String x:Key="configurationWindow_deepLightGlueModelDownloadFailed">Не удалось загрузить модель LightGlue: {0}</v:String>
+
+    <!-- DINOv2 -->
+    <v:String x:Key="configurationWindow_deepDinov2ModelNotFound">Файл модели DINOv2 не найден: {0}. Разместите его вручную; автоматическая загрузка недоступна.</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2UrlMissing">Не указан URL загрузки модели DINOv2 (Настройки &gt; Deep).</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2ModelUpToDate">Модель DINOv2 уже актуальна: {0}</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2Downloading">Загрузка модели DINOv2… {0}</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2Downloaded">Модель DINOv2 загружена: {0}</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2DownloadFailed">Не удалось загрузить модель DINOv2: {0}</v:String>
+
+</ResourceDictionary>
