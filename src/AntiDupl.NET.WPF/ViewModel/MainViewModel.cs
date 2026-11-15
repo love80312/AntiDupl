@@ -673,7 +673,7 @@ namespace AntiDupl.NET.WPF.ViewModel
 
         /// <summary>
         /// Режим пар (вкладка 0). Кнопки действий панели (Mistake/PerformHint/Delete…)
-\n        /// имеют смысл только здесь — в WF они видны только в режимах
+        /// имеют смысл только здесь — в WF они видны только в режимах
         /// VerticalPairTable/HorizontalPairTable (MainToolStrip.SetViewMode).
         /// </summary>
         public bool IsPairMode
@@ -747,6 +747,7 @@ namespace AntiDupl.NET.WPF.ViewModel
 
         /// <summary>Удалить обе картинки текущей пары (зеркало WF DeleteBothes*Button).</summary>
         ICommand _toolDeleteBothCommand;
+        public ICommand ToolDeleteBothCommand
         {
             get
             {
