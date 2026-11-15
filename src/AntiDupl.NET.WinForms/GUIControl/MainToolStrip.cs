@@ -74,6 +74,7 @@ namespace AntiDupl.NET.WinForms
         private ToolStripButton m_deleteBothButton;
         private ToolStripButton m_deleteDefectButton;
 
+        private ToolStripButton m_highlightButton;
         private ToolStripButton m_helpButton;
 
         public MainToolStrip(CoreLib core, Options options, CoreOptions coreOptions, MainMenu mainMenu, MainForm mainForm, MainSplitContainer mainSplitContainer)
@@ -95,7 +96,8 @@ namespace AntiDupl.NET.WinForms
         {
             Visible = m_options.mainFormOptions.toolStripView;
             RenderMode = ToolStripRenderMode.System;
-            ThemedToolStripRenderer.Set(this);
+            ThemedToolStripRenderer renderer = new ThemedToolStripRenderer();
+            Renderer = renderer;
             BackColor = SystemColors.Control;
             GripStyle = ToolStripGripStyle.Hidden;
             // Without it a ToolStrip only activates an inactive window on the
@@ -109,7 +111,7 @@ namespace AntiDupl.NET.WinForms
             m_refreshButton = InitFactory.ToolButton.Create("RefreshButton", null, m_mainMenu.RefreshResultsAction);
             m_pathsButton = InitFactory.ToolButton.Create("PathsButton", null, m_mainMenu.PathsAction);
             m_optionsButton = InitFactory.ToolButton.Create("OptionsButton", null, m_mainMenu.OptionsAction);
-            
+
             m_thresholdDifferenceComboBox = new ToolStripComboBox();
             m_thresholdDifferenceComboBox.AutoSize = false;
             m_thresholdDifferenceComboBox.Size = new System.Drawing.Size(60, 20);
@@ -139,6 +141,15 @@ namespace AntiDupl.NET.WinForms
             m_deleteBothButton = InitFactory.ToolButton.Create("DeleteBothesVerticalButton", CoreDll.LocalActionType.DeleteBoth, MakeAction);
 
             m_deleteDefectButton = InitFactory.ToolButton.Create("DeleteDefectsVerticalButton", CoreDll.LocalActionType.DeleteDefect, MakeAction);
+
+            m_highlightButton = InitFactory.ToolButton.Create("HighlightButton.png", null, OnHighlightButtonClicked);
+            m_highlightButton.CheckOnClick = true;
+            renderer.FramedWhenChecked = m_highlightButton;
+            m_highlightButton.Checked = m_options.resultsOptions.HighlightDifference;
+            m_options.resultsOptions.OnHighlightDifferenceChange += delegate
+            {
+                m_highlightButton.Checked = m_options.resultsOptions.HighlightDifference;
+            };
 
             m_helpButton = InitFactory.ToolButton.Create("HelpButton", null, m_mainMenu.HelpAction);
 
@@ -174,6 +185,7 @@ namespace AntiDupl.NET.WinForms
             m_deleteBothButton.ToolTipText = s.ResultsListViewContextMenu_DeleteBothItem_Text;
             m_deleteDefectButton.ToolTipText = s.ResultsListViewContextMenu_DeleteDefectItem_Text;
 
+            m_highlightButton.ToolTipText = s.CoreOptionsForm_HighlightDifferenceCheckBox_Text;
             m_helpButton.ToolTipText = s.MainMenu_Help_HelpMenuItem_Text;
         }
 
@@ -194,7 +206,7 @@ namespace AntiDupl.NET.WinForms
             CoreDll.LocalActionType action = (CoreDll.LocalActionType)item.Tag;
             m_mainSplitContainer.resultsListView.MakeAction(action, CoreDll.TargetType.Selected);
         }
-        
+
         private void OnSelectedResultsChanged()
         {
             bool mistake = m_core.CanApply(CoreDll.ActionEnableType.Any);
@@ -269,6 +281,7 @@ namespace AntiDupl.NET.WinForms
                 Items.Add(m_deleteDefectButton);
             }
             Items.Add(new ToolStripSeparator());
+            Items.Add(m_highlightButton);
             Items.Add(m_helpButton);
 
             if (viewMode == ResultsOptions.ViewMode.VerticalPairTable)
@@ -285,6 +298,12 @@ namespace AntiDupl.NET.WinForms
                 m_deleteSecondButton.Image = Resources.Images.Get("DeleteSecondsHorizontalButton");
                 m_deleteBothButton.Image = Resources.Images.Get("DeleteBothesHorizontalButton");
             }
+        }
+
+        private void OnHighlightButtonClicked(object sender, EventArgs e)
+        {
+            m_options.resultsOptions.HighlightDifference = m_highlightButton.Checked;
+            m_options.resultsOptions.RaiseEventOnHighlightDifferenceChange();
         }
 
         private void OnThresholdDifferenceChanged(object sender, EventArgs e)
