@@ -600,10 +600,9 @@ namespace AntiDupl.NET.WinForms
 
         private void UpdateSubFolderOptions(ItemCheckEventArgs e)
         {
-            CheckedListBox checkedListBox = GetCurrentCheckedListBox();
-            CorePathWithSubFolder[] path = GetCurrentPath();
+            CorePathWithSubFolder[] path = m_newCoreOptions.searchPath;
 
-            if (checkedListBox == null || path == null || e.Index < 0 || e.Index >= path.Length)
+            if (path == null || e.Index < 0 || e.Index >= path.Length)
                 return;
 
             path[e.Index].enableSubFolder = e.NewValue != CheckState.Unchecked;
