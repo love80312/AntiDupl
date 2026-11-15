@@ -217,6 +217,7 @@
   <MainMenu_View_HotKeysMenuItem_Text>快速鍵</MainMenu_View_HotKeysMenuItem_Text>
   <MainMenu_View_StretchSmallImagesMenuItem_Text>延展小圖片</MainMenu_View_StretchSmallImagesMenuItem_Text>
   <MainMenu_View_ProportionalImageSizeMenuItem_Text>圖片等比例大小</MainMenu_View_ProportionalImageSizeMenuItem_Text>
+  <MainMenu_View_AlignImagesToDividerMenuItem_Text>圖片靠齊分隔線</MainMenu_View_AlignImagesToDividerMenuItem_Text>
   <MainMenu_View_ShowNeighbourImageMenuItem_Text>顯示相鄰圖片</MainMenu_View_ShowNeighbourImageMenuItem_Text>
   <MainMenu_SearchMenuItem_Text>搜尋</MainMenu_SearchMenuItem_Text>
   <MainMenu_Search_StartMenuItem_Text>開始搜尋</MainMenu_Search_StartMenuItem_Text>
