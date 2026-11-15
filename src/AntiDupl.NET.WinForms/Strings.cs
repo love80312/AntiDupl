@@ -47,7 +47,7 @@ namespace AntiDupl.NET.WinForms
         public string MainForm_IgnoreFoldersNotFound;
         public string ErrorMessage_SettingsFileUnreadable;
         public string ErrorMessage_SettingsFileUnreadableNotCopied;
-        
+
         public string WarningMessage_ChangeFileExtension;
 
         public string AboutProgramPanel_CopyrightLabel0_Text;
@@ -297,6 +297,7 @@ namespace AntiDupl.NET.WinForms
         public string MainMenu_View_HotKeysMenuItem_Text;
         public string MainMenu_View_StretchSmallImagesMenuItem_Text;
         public string MainMenu_View_ProportionalImageSizeMenuItem_Text;
+        public string MainMenu_View_AlignImagesToDividerMenuItem_Text;
         public string MainMenu_View_ShowNeighbourImageMenuItem_Text;
 
         public string MainMenu_SearchMenuItem_Text;
