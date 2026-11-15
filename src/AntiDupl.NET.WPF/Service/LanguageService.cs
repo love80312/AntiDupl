@@ -1,4 +1,5 @@
-﻿using System;
+
+using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
@@ -33,9 +34,14 @@ namespace AntiDupl.NET.WPF.Service
 
             if (_config != null)
             {
-                var culture = _config.Language?.ToCultureInfo() ?? new CultureInfo("en-US");
+                var culture = _config.Language?.ToCultureInfo()
+                    ?? new CultureInfo("en-US");
+
                 Language = culture;
-                SetCheckedForLanguageCollection(GetLanguageEnumFromCulture(culture), LanguageCollection);
+
+                SetCheckedForLanguageCollection(
+                    GetLanguageEnumFromCulture(culture),
+                    LanguageCollection);
             }
             else
             {
@@ -43,11 +49,14 @@ namespace AntiDupl.NET.WPF.Service
             }
         }
 
-        private readonly ObservableCollection<LanguageViewModel> _languageCollection = new();
+        private readonly ObservableCollection<LanguageViewModel>
+            _languageCollection = new();
 
-        public ObservableCollection<LanguageViewModel> LanguageCollection => _languageCollection;
+        public ObservableCollection<LanguageViewModel> LanguageCollection
+            => _languageCollection;
 
         private ICommand _languageSelectedCommand;
+
         public ICommand LanguageSelectedCommand
         {
             get
@@ -57,71 +66,108 @@ namespace AntiDupl.NET.WPF.Service
                     if (arg is not LanguageEnum language)
                         return;
 
-                    SetCheckedForLanguageCollection(language, LanguageCollection);
-                    CultureInfo newLanguage = GetCultureFromLanguageEnum(language);
+                    SetCheckedForLanguageCollection(
+                        language,
+                        LanguageCollection);
+
+                    CultureInfo newLanguage =
+                        GetCultureFromLanguageEnum(language);
+
                     if (_config != null)
-                        _config.Language = SerializableCultureInfo.FromCultureInfo(newLanguage);
+                    {
+                        _config.Language =
+                            SerializableCultureInfo.FromCultureInfo(newLanguage);
+                    }
+
                     Language = newLanguage;
                 });
             }
         }
 
-        private static string GetLanguageTitle(LanguageEnum language) => language switch
+        private static string GetLanguageTitle(LanguageEnum language)
         {
-            LanguageEnum.English => "English",
-            LanguageEnum.Russian => "Русский",
-            LanguageEnum.TraditionalChinese => "繁體中文",
-            _ => language.ToString()
-        };
+            return language switch
+            {
+                LanguageEnum.English => "English",
+                LanguageEnum.Russian => "Русский",
+                LanguageEnum.TraditionalChinese => "繁體中文",
+                _ => language.ToString()
+            };
+        }
 
         private static void SetCheckedForLanguageCollection(
             LanguageEnum language,
             ObservableCollection<LanguageViewModel> collection)
         {
             foreach (var item in collection)
+            {
                 item.IsChecked = item.Enum == language;
+            }
         }
 
-        private static CultureInfo GetCultureFromLanguageEnum(LanguageEnum language) => language switch
+        private static CultureInfo GetCultureFromLanguageEnum(
+            LanguageEnum language)
         {
-            LanguageEnum.English => new CultureInfo("en-US"),
-            LanguageEnum.Russian => new CultureInfo("ru-RU"),
-            LanguageEnum.TraditionalChinese => new CultureInfo("zh-TW"),
-            _ => throw new ArgumentOutOfRangeException(nameof(language), language, "Unsupported language")
-        };
+            return language switch
+            {
+                LanguageEnum.English => new CultureInfo("en-US"),
+                LanguageEnum.Russian => new CultureInfo("ru-RU"),
+                LanguageEnum.TraditionalChinese => new CultureInfo("zh-TW"),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(language),
+                    language,
+                    "Unsupported language")
+            };
+        }
 
-        private static LanguageEnum GetLanguageEnumFromCulture(CultureInfo culture) => culture.Name switch
+        private static LanguageEnum GetLanguageEnumFromCulture(
+            CultureInfo culture)
         {
-            "en-US" => LanguageEnum.English,
-            "ru-RU" => LanguageEnum.Russian,
-            "zh-TW" => LanguageEnum.TraditionalChinese,
-            _ => LanguageEnum.English
-        };
+            return culture.Name switch
+            {
+                "en-US" => LanguageEnum.English,
+                "ru-RU" => LanguageEnum.Russian,
+                "zh-TW" => LanguageEnum.TraditionalChinese,
+                _ => LanguageEnum.English
+            };
+        }
 
         public CultureInfo Language
         {
             get => System.Threading.Thread.CurrentThread.CurrentUICulture;
+
             set
             {
                 if (value == null)
                     throw new ArgumentNullException(nameof(value));
 
-                // 即使 CurrentUICulture 已相同，也必須套用字典；Windows 系統語言可能
-                // 與使用者在 configuration.xml 中保存的語言相同，但資源字典尚未載入。
                 System.Threading.Thread.CurrentThread.CurrentUICulture = value;
 
-                ResourceDictionary dict = new ResourceDictionary();
+                var dictionaries =
+                    Application.Current.Resources.MergedDictionaries;
+
+                // 主要語系字典。
                 string dictionaryName = value.Name switch
                 {
                     "ru-RU" => "Resources/lang.ru-RU.xaml",
                     "zh-TW" => "Resources/lang.zh-TW.xaml",
                     _ => "Resources/lang.xaml"
                 };
-                dict.Source = new Uri(dictionaryName, UriKind.Relative);
 
-                var dictionaries = Application.Current.Resources.MergedDictionaries;
+                ResourceDictionary dict = new ResourceDictionary
+                {
+                    Source = new Uri(dictionaryName, UriKind.Relative)
+                };
+
+                // 不要將 .extra.xaml 誤認為主要語系字典。
                 ResourceDictionary oldDict = dictionaries.FirstOrDefault(d =>
-                    d.Source != null && d.Source.OriginalString.StartsWith("Resources/lang.", StringComparison.Ordinal));
+                    d.Source != null &&
+                    d.Source.OriginalString.StartsWith(
+                        "Resources/lang.",
+                        StringComparison.Ordinal) &&
+                    !d.Source.OriginalString.EndsWith(
+                        ".extra.xaml",
+                        StringComparison.OrdinalIgnoreCase));
 
                 if (oldDict != null)
                 {
@@ -134,7 +180,40 @@ namespace AntiDupl.NET.WPF.Service
                     dictionaries.Add(dict);
                 }
 
-                LanguageChanged?.Invoke(Application.Current, EventArgs.Empty);
+                // 補充語系字典。
+                string extraDictionaryName = value.Name switch
+                {
+                    "ru-RU" => "Resources/lang.ru-RU.extra.xaml",
+                    "zh-TW" => "Resources/lang.zh-TW.extra.xaml",
+                    _ => "Resources/lang.extra.xaml"
+                };
+
+                ResourceDictionary extraDict = new ResourceDictionary
+                {
+                    Source = new Uri(extraDictionaryName, UriKind.Relative)
+                };
+
+                ResourceDictionary oldExtraDict =
+                    dictionaries.FirstOrDefault(d =>
+                        d.Source != null &&
+                        d.Source.OriginalString.EndsWith(
+                            ".extra.xaml",
+                            StringComparison.OrdinalIgnoreCase));
+
+                if (oldExtraDict != null)
+                {
+                    int index = dictionaries.IndexOf(oldExtraDict);
+                    dictionaries.Remove(oldExtraDict);
+                    dictionaries.Insert(index, extraDict);
+                }
+                else
+                {
+                    dictionaries.Add(extraDict);
+                }
+
+                LanguageChanged?.Invoke(
+                    Application.Current,
+                    EventArgs.Empty);
             }
         }
     }
