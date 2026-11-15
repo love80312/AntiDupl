@@ -99,7 +99,7 @@
   <CorePathsForm_AddFilesButton_Text>新增檔案</CorePathsForm_AddFilesButton_Text>
   <CorePathsForm_ChangeButton_Text>變更</CorePathsForm_ChangeButton_Text>
   <CorePathsForm_RemoveButton_Text>移除</CorePathsForm_RemoveButton_Text>
-  <CorePathsForm_IgnoreFilenameFilter_Text>檔案名稱過濾器（正規表示式）：</CorePathsForm_IgnoreFilenameFilter_Text>
+  <CorePathsForm_IgnoreFilenameFilter_Text>檔名篩選（正規表達式）：</CorePathsForm_IgnoreFilenameFilter_Text>
   <CorePathsForm_SearchCheckedListBox_ToolTip_Text>勾選方塊表示在此目錄的子目錄中搜尋。</CorePathsForm_SearchCheckedListBox_ToolTip_Text>
   <ProgressUtils_Completed>已完成 {0}%</ProgressUtils_Completed>
   <ProgressUtils_5HoursRemaining>剩餘 {0} 小時</ProgressUtils_5HoursRemaining>
