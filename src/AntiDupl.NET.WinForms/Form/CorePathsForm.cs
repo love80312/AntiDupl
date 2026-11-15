@@ -1,3 +1,4 @@
+
 /*
 * AntiDupl.NET Program (http://ermig1979.github.io/AntiDupl).
 *
