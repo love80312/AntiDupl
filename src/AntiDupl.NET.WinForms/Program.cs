@@ -1,28 +1,31 @@
+
 /*
 * AntiDupl.NET Program (http://ermig1979.github.io/AntiDupl).
 *
 * Copyright (c) 2002-2023 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 
@@ -33,53 +36,52 @@ namespace AntiDupl.NET.WinForms
         [STAThread]
         static void Main(string[] args)
         {
-#if !PUBLISH
-            if (IsDotNet4Installed)
-#endif
-            {
-                CommandLine commandLine = CommandLine.Parse(args);
-                string customSavePath = commandLine.UserPath;
-                if (customSavePath != null)
-                {
-                    DirectoryInfo directoryInfo = new DirectoryInfo(customSavePath);
-                    if (!directoryInfo.Exists)
-                        throw new Exception(String.Format("The directory '{0}' is not exists!", customSavePath));
-                    Resources.UserPath = customSavePath;
-                }
-                else
-                {
-                    Resources.UserPath = Resources.GetDefaultUserPath();
-                }
-                Resources.Strings.Initialize();
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                // The color mode can't change once a window exists, so the
-                // options are read here, before the main window.
-                Options options = Options.Load();
-                Application.SetColorMode(options.colorMode);
-                Application.Run(new MainForm(options, commandLine));
-            }
-#if !PUBLISH
-            else if (MessageBox.Show("You need Microsoft .NET Framework 4.8 in order to run this program. Do you want to download .Net Framework 4.8?", "Warning",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
-                System.Diagnostics.Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48");
-#endif
-        }
+            CommandLine commandLine = CommandLine.Parse(args);
 
-        private static bool IsDotNet4Installed
-        {
-            get
-            {
-                try
-                {
-                    return (Convert.ToInt32(Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Client").GetValue("Install")) == 1);
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-        }
+            string customSavePath = commandLine.UserPath;
 
+            if (customSavePath != null)
+            {
+                DirectoryInfo directoryInfo =
+                    new DirectoryInfo(customSavePath);
+
+                if (!directoryInfo.Exists)
+                {
+                    throw new Exception(
+                        String.Format(
+                            "The directory '{0}' does not exist!",
+                            customSavePath));
+                }
+
+                Resources.UserPath = customSavePath;
+            }
+            else
+            {
+                Resources.UserPath = Resources.GetDefaultUserPath();
+            }
+
+            Resources.Strings.Initialize();
+
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            // 全程式預設字型。
+            // 必須在建立任何 Form 之前設定。
+            Application.SetDefaultFont(
+                new Font(
+                    "Microsoft JhengHei UI",
+                    10F,
+                    FontStyle.Regular,
+                    GraphicsUnit.Point));
+
+            // The color mode can't change once a window exists,
+            // so the options are read here, before the main window.
+            Options options = Options.Load();
+
+            Application.SetColorMode(options.colorMode);
+
+            Application.Run(
+                new MainForm(options, commandLine));
+        }
     }
 }
