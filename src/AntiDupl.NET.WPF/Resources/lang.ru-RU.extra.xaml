@@ -48,4 +48,9 @@
     <v:String x:Key="configurationWindow_deepDinov2Downloaded">Модель DINOv2 загружена: {0}</v:String>
     <v:String x:Key="configurationWindow_deepDinov2DownloadFailed">Не удалось загрузить модель DINOv2: {0}</v:String>
 
+    <!-- Операции с файлами в главном окне -->
+    <v:String x:Key="mainViewModel_contextMenuReplaceFile">Заменить _{0} на {1}</v:String>
+    <v:String x:Key="mainViewModel_contextMenuDeleteFile">Удалить _{0}</v:String>
+    <v:String x:Key="mainViewModel_resultFileFilter">Файлы результатов(*.anr)|*.anr</v:String>
+
 </ResourceDictionary>

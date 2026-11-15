@@ -38,7 +38,7 @@ namespace AntiDupl.NET.WPF.ViewModel
     {
         const int DUPL_IMAGE_TAB_INDEX = 0;
         const int COMPARE_TAB_INDEX = 2;
-        
+
         CoreLib _core;
         IWindowService _windowService;
         ClipboardService _clipboardService;
@@ -73,6 +73,7 @@ namespace AntiDupl.NET.WPF.ViewModel
         /// <summary>
         /// C#-пайплайн deep (DINOv2) поиска (AntiDupl.NET.Deep). Инжектится App.xaml.cs
         /// после BuildServiceProvider; null — deep-режим недоступен.
+
         /// </summary>
         public DeepSearchService DeepSearchService { get; private set; }
 
@@ -147,7 +148,6 @@ namespace AntiDupl.NET.WPF.ViewModel
             // Фильтр имён ignore-списка живёт в configuration.xml (зеркало WF options.xml).
             LocationsModel.IgnoreFilenameFilter = Configuration.IgnoreFilenameFilter;
             Configuration.PropertyChanged += OnConfigurationPropertyChanged;
-
             _languageService.LanguageChanged += OnLanguageChanged;
             InitializeCompareModeOptions();
 
@@ -673,7 +673,7 @@ namespace AntiDupl.NET.WPF.ViewModel
 
         /// <summary>
         /// Режим пар (вкладка 0). Кнопки действий панели (Mistake/PerformHint/Delete…)
-        /// имеют смысл только здесь — в WF они видны только в режимах
+\n        /// имеют смысл только здесь — в WF они видны только в режимах
         /// VerticalPairTable/HorizontalPairTable (MainToolStrip.SetViewMode).
         /// </summary>
         public bool IsPairMode
@@ -747,7 +747,6 @@ namespace AntiDupl.NET.WPF.ViewModel
 
         /// <summary>Удалить обе картинки текущей пары (зеркало WF DeleteBothes*Button).</summary>
         ICommand _toolDeleteBothCommand;
-        public ICommand ToolDeleteBothCommand
         {
             get
             {
@@ -1037,7 +1036,7 @@ namespace AntiDupl.NET.WPF.ViewModel
                         }, arg => renameImageUndoCommand != null);
                         menu[2] = new BindableMenuItem();
                         //TODO почему то не выводится на экран символ _ в имени файла
-                        menu[2].Name = String.Format("Replace _{0} to {1}", result.FirstFile.FileName, result.SecondFile.FileName);
+                        menu[2].Name = LocalizationHelper.S("mainViewModel_contextMenuReplaceFile", result.FirstFile.FileName, result.SecondFile.FileName);
                         menu[2].Command = renameFirstCommand;
 
                         IUCommand renameSecondImageUndoCommand = new ReplaceCommand(result, PositionInDuplPair.Second, _resultList,
@@ -1047,7 +1046,7 @@ namespace AntiDupl.NET.WPF.ViewModel
                             _undoRedoEngine.ExecuteCommand(renameSecondImageUndoCommand);
                         }, arg => renameSecondImageUndoCommand != null);
                         menu[3] = new BindableMenuItem();
-                        menu[3].Name = String.Format("Replace _{0} to {1}", result.SecondFile.FileName, result.FirstFile.FileName);
+                        menu[3].Name = LocalizationHelper.S("mainViewModel_contextMenuReplaceFile", result.SecondFile.FileName, result.FirstFile.FileName);
                         menu[3].Command = renameSecondCommand;
 
                         //IUCommand deleteFirstUndoCommand = new DeleteCurrentImageCommand(result, PositionInDuplPair.First, _resultList,
@@ -1058,7 +1057,7 @@ namespace AntiDupl.NET.WPF.ViewModel
                             _undoRedoEngine.ExecuteCommand(deleteFirstUndoCommand);
                         }, arg => deleteFirstUndoCommand != null);
                         menu[4] = new BindableMenuItem();
-                        menu[4].Name = String.Format("Delete _{0}", result.FirstFile.FileName);
+                        menu[4].Name = LocalizationHelper.S("mainViewModel_contextMenuDeleteFile", result.FirstFile.FileName);
                         menu[4].Command = deleteFirstCommand;
 
                         IUCommand deleteSecondUndoCommand = new DeleteCurrentImageCommand(result, PositionInDuplPair.Second, _resultList,
@@ -1068,7 +1067,7 @@ namespace AntiDupl.NET.WPF.ViewModel
                             _undoRedoEngine.ExecuteCommand(deleteSecondUndoCommand);
                         }, arg => deleteSecondUndoCommand != null);
                         menu[5] = new BindableMenuItem();
-                        menu[5].Name = String.Format("Delete _{0}", result.SecondFile.FileName);
+                        menu[5].Name = LocalizationHelper.S("mainViewModel_contextMenuDeleteFile", result.SecondFile.FileName);
                         menu[5].Command = deleteSecondCommand;
 
                         // Пункт «Ignore pair» (текущая пара) — восстановлен (аудит зеркала WF: потерянные пункты меню).
@@ -1197,7 +1196,6 @@ namespace AntiDupl.NET.WPF.ViewModel
                         menu[0] = new BindableMenuItem();
                         menu[0].Name = Application.Current.Resources["mainwindow_contextmenu_IgnoreGroup"] as string;
                         menu[0].Command = ignoreCommand;
-
                         ICommand openComparatorCommand = new RelayCommand(arg =>
                         {
                             ComparatorViewModel vm = new ComparatorViewModel(group, _groups, GroupsCollection,
@@ -1679,7 +1677,7 @@ namespace AntiDupl.NET.WPF.ViewModel
                     if (Directory.Exists(directory))
                     {
                         OpenFileDialog dialog = new OpenFileDialog();
-                        dialog.Filter = "Result Files(*.anr)|*.anr";
+                        dialog.Filter = LocalizationHelper.S("mainViewModel_resultFileFilter");
                         dialog.CheckFileExists = true;
                         dialog.InitialDirectory = directory;
 
@@ -1797,10 +1795,9 @@ namespace AntiDupl.NET.WPF.ViewModel
                 return _saveResultsCommand ?? (_saveResultsCommand = new RelayCommand(arg =>
                 {
                     string directory = DirectoryHelper.ResultDirectory;
-
                     SaveFileDialog dialog = new SaveFileDialog()
                     {
-                        Filter = "Result Files(*.anr)|*.anr",
+                        Filter = LocalizationHelper.S("mainViewModel_resultFileFilter"),
                         InitialDirectory = directory
                     };
 
@@ -1837,7 +1834,7 @@ namespace AntiDupl.NET.WPF.ViewModel
                 }
             }
         }
-  
+
 
         #region Compare mode buttons
 
@@ -2078,7 +2075,7 @@ namespace AntiDupl.NET.WPF.ViewModel
                     Task.Factory.StartNew(() =>
                     {
                         progressDialogViewModel.ProgressMax = (uint)_resultList.Count;
-                        
+
                             try
                             {
 								foreach (var item in _resultList)
@@ -2095,7 +2092,7 @@ namespace AntiDupl.NET.WPF.ViewModel
 
 									progressDialogViewModel.Progress++;
 									if (progressDialogViewModel.IsCancelled)
-										break;
+									break;
 								}
                             }
                             catch (Exception ex)

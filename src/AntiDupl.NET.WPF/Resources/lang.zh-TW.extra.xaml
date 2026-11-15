@@ -48,4 +48,9 @@
     <v:String x:Key="configurationWindow_deepDinov2Downloaded">DINOv2 模型已下載：{0}</v:String>
     <v:String x:Key="configurationWindow_deepDinov2DownloadFailed">DINOv2 模型下載失敗：{0}</v:String>
 
+    <!-- 主視窗檔案操作 -->
+    <v:String x:Key="mainViewModel_contextMenuReplaceFile">將 _{0} 替換為 {1}</v:String>
+    <v:String x:Key="mainViewModel_contextMenuDeleteFile">刪除 _{0}</v:String>
+    <v:String x:Key="mainViewModel_resultFileFilter">結果檔案(*.anr)|*.anr</v:String>
+
 </ResourceDictionary>

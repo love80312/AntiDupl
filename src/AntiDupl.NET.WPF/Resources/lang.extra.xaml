@@ -48,4 +48,9 @@
     <v:String x:Key="configurationWindow_deepDinov2Downloaded">DINOv2 model downloaded: {0}</v:String>
     <v:String x:Key="configurationWindow_deepDinov2DownloadFailed">DINOv2 model download failed: {0}</v:String>
 
+    <!-- Main window file operations -->
+    <v:String x:Key="mainViewModel_contextMenuReplaceFile">Replace _{0} to {1}</v:String>
+    <v:String x:Key="mainViewModel_contextMenuDeleteFile">Delete _{0}</v:String>
+    <v:String x:Key="mainViewModel_resultFileFilter">Result Files(*.anr)|*.anr</v:String>
+
 </ResourceDictionary>
