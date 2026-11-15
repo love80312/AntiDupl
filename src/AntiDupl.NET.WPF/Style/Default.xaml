@@ -1,6 +1,13 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    
+
+    <!-- WPF 全域字型：所有 Window 子控制項會繼承字型與字級。 -->
+    <Style TargetType="{x:Type Window}">
+        <Setter Property="FontFamily" Value="Microsoft JhengHei UI" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
     <Style x:Key="DataGridAlternation" TargetType="{x:Type DataGrid}">
         <Setter Property="AlternationCount" Value="2" />
     </Style>
@@ -27,7 +34,7 @@
             </Style.Triggers>-->
     </Style>
 
-    <Style x:Key="CollapsedButton"  TargetType="{x:Type Button}">
+    <Style x:Key="CollapsedButton" TargetType="{x:Type Button}">
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -35,7 +42,8 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="VerticalAlignmentCenter"  TargetType="{x:Type TextBlock}">
+    <Style x:Key="VerticalAlignmentCenter" TargetType="{x:Type TextBlock}">
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
+
 </ResourceDictionary>
