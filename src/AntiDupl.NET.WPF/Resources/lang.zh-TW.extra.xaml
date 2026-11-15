@@ -1,0 +1,51 @@
+
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:v="clr-namespace:System;assembly=mscorlib">
+
+    <!-- 圖片比較器 -->
+    <v:String x:Key="comparatorWindow_Previous">上一張</v:String>
+    <v:String x:Key="comparatorWindow_Next">下一張</v:String>
+    <v:String x:Key="comparatorWindow_Resolution">解析度</v:String>
+    <v:String x:Key="comparatorWindow_FileSize">檔案大小</v:String>
+    <v:String x:Key="comparatorWindow_Blockiness">方塊效應</v:String>
+    <v:String x:Key="comparatorWindow_Blurring">模糊度</v:String>
+    <v:String x:Key="comparatorWindow_UtilityIndex">效用指數</v:String>
+
+    <!-- 自訂動作 -->
+    <v:String x:Key="configurableActionWindow_LabelAction">動作</v:String>
+    <v:String x:Key="configurableActionWindow_LabelFilterConditions">篩選條件</v:String>
+    <v:String x:Key="configurableActionWindow_GroupDirectory">資料夾</v:String>
+    <v:String x:Key="configurableActionWindow_GroupBestSelectingByImageProperties">依圖片屬性選擇最佳圖片</v:String>
+    <v:String x:Key="configurableActionWindow_GroupBestSelectingByFilePath">依檔案路徑選擇最佳圖片</v:String>
+    <v:String x:Key="configurableActionWindow_LabelAlgorithmForNumber">從檔名擷取編號的演算法</v:String>
+    <v:String x:Key="configurableActionWindow_ButtonPreview">預覽</v:String>
+    <v:String x:Key="configurableActionWindow_LabelSelectedItem">已選取項目</v:String>
+    <v:String x:Key="configurableActionWindow_ContextOpenComparator">開啟圖片比較器</v:String>
+    <v:String x:Key="configurableActionWindow_ContextShowDifferenceInPercent">以百分比顯示差異</v:String>
+    <v:String x:Key="configurableActionWindow_ColumnFiles">檔案</v:String>
+    <v:String x:Key="configurableActionWindow_ColumnBestImage">最佳圖片</v:String>
+    <v:String x:Key="configurableActionWindow_ColumnBestByPath">依路徑選擇最佳圖片</v:String>
+    <v:String x:Key="configurableActionWindow_ColumnConfigurableAction">自訂動作</v:String>
+    <v:String x:Key="configurableActionWindow_LabelTotal">總計</v:String>
+    <v:String x:Key="configurableActionWindow_ButtonGo">開始</v:String>
+
+    <!-- 準則權重 -->
+    <v:String x:Key="prioritiesWindow_button_SetDefault">還原預設值</v:String>
+    <v:String x:Key="prioritiesWindow_button_OK">確定</v:String>
+
+    <!-- LightGlue -->
+    <v:String x:Key="configurationWindow_deepLightGlueModelUpToDate">LightGlue 模型已是最新版本：{0}</v:String>
+    <v:String x:Key="configurationWindow_deepLightGlueModelDownloading">正在下載 LightGlue 模型… {0}</v:String>
+    <v:String x:Key="configurationWindow_deepLightGlueModelDownloaded">LightGlue 模型已下載：{0}</v:String>
+    <v:String x:Key="configurationWindow_deepLightGlueModelDownloadFailed">LightGlue 模型下載失敗：{0}</v:String>
+
+    <!-- DINOv2 -->
+    <v:String x:Key="configurationWindow_deepDinov2ModelNotFound">找不到 DINOv2 模型檔案：{0}。請手動放置；不提供自動下載。</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2UrlMissing">尚未設定 DINOv2 模型下載網址（設定 &gt; 深度搜尋）。</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2ModelUpToDate">DINOv2 模型已是最新版本：{0}</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2Downloading">正在下載 DINOv2 模型… {0}</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2Downloaded">DINOv2 模型已下載：{0}</v:String>
+    <v:String x:Key="configurationWindow_deepDinov2DownloadFailed">DINOv2 模型下載失敗：{0}</v:String>
+
+</ResourceDictionary>
