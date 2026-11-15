@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ using AntiDupl.NET.WPF.Core;
 using AntiDupl.NET.WPF.Model;
 using AntiDupl.NET.WPF.Service;
 using AntiDupl.NET.WPF.View;
+using AntiDupl.NET.WPF.Helper;
 
 using AntiDupl.NET.Core;
 using AntiDupl.NET.Deep.Logging;
@@ -20,6 +22,7 @@ namespace AntiDupl.NET.WPF.ViewModel
     public class ConfigurationViewModel : PropertyChangedBase
     {
         private IConfigurationModel _configuration;
+
         public IConfigurationModel Configuration
         {
             get { return _configuration; }
@@ -27,38 +30,49 @@ namespace AntiDupl.NET.WPF.ViewModel
 
         public int Delay { get; set; }
         private DispatcherTimer timer;
+
         IWindowService _windowService;
         CoreLib _core;
+
         public CoreOptions Option { get; set; }
+
         IThumbnailProvider _thumbnailProvider;
         IDeepLogger _deepLogger;
 
-        public ConfigurationViewModel(IConfigurationModel configuration, IWindowService windowService, CoreLib core, CoreOptions option, 
-            IThumbnailProvider thumbnailProvider, IDeepLogger deepLogger)
+        public ConfigurationViewModel(
+            IConfigurationModel configuration,
+            IWindowService windowService,
+            CoreLib core,
+            CoreOptions option,
+            IThumbnailProvider thumbnailProvider,
+            IDeepLogger deepLogger)
         {
-            this._configuration = configuration;
+            _configuration = configuration;
             _windowService = windowService;
             _core = core;
+
             Delay = 500;
+
             _thumbnailWidth = _configuration.ThumbnailWidth;
             Option = option;
+
             _thumbnailProvider = thumbnailProvider;
             _deepLogger = deepLogger;
         }
 
         int _thumbnailWidth;
+
         public int ThumbnailWidth
         {
             get { return _thumbnailWidth; }
+
             set
             {
                 if (_thumbnailWidth != value)
                 {
                     _thumbnailWidth = value;
-                    //_configuration.ThumbnailWidth = value;
-                    //ThumbnailProvider.Instance.ClearThumbnailCache();
 
-                    if (this.Delay > 0)
+                    if (Delay > 0)
                     {
                         if (timer != null)
                             timer.Stop();
@@ -66,7 +80,8 @@ namespace AntiDupl.NET.WPF.ViewModel
                         if (timer == null)
                         {
                             timer = new DispatcherTimer();
-                            timer.Interval = TimeSpan.FromMilliseconds(this.Delay);
+                            timer.Interval = TimeSpan.FromMilliseconds(Delay);
+
                             timer.Tick += (object s, EventArgs ea) =>
                             {
                                 DispatcherTimer t = s as DispatcherTimer;
@@ -99,98 +114,136 @@ namespace AntiDupl.NET.WPF.ViewModel
         //    }
         //}
 
-
         private bool _deleteResized;
+
         public bool DeleteResized
         {
             get { return _deleteResized; }
+
             set
             {
                 _deleteResized = value;
-                this.RaisePropertyChangedEvent();
+                RaisePropertyChangedEvent();
             }
         }
 
         ICommand _changeGoodColorCommand;
+
         public ICommand ChangeGoodColorCommand
         {
             get
             {
-                return _changeGoodColorCommand ?? (_changeGoodColorCommand = new RelayCommand(arg =>
-                {
-                    ColorViewModel vm = new ColorViewModel(Configuration.GoodColor);
-                    _windowService.ShowDialogWindow<ColorWindow>(vm);
-                    Configuration.GoodColor = vm.Color;
-                }));
+                return _changeGoodColorCommand ??
+                    (_changeGoodColorCommand = new RelayCommand(arg =>
+                    {
+                        ColorViewModel vm =
+                            new ColorViewModel(Configuration.GoodColor);
+
+                        _windowService.ShowDialogWindow<ColorWindow>(vm);
+                        Configuration.GoodColor = vm.Color;
+                    }));
             }
         }
 
         ICommand _changeBadColorCommand;
+
         public ICommand ChangeBadColorCommand
         {
             get
             {
-                return _changeBadColorCommand ?? (_changeBadColorCommand = new RelayCommand(arg =>
-                {
-                    ColorViewModel vm = new ColorViewModel(Configuration.BadColor);
-                    _windowService.ShowDialogWindow<ColorWindow>(vm);
-                    Configuration.BadColor = vm.Color;
-                }));
+                return _changeBadColorCommand ??
+                    (_changeBadColorCommand = new RelayCommand(arg =>
+                    {
+                        ColorViewModel vm =
+                            new ColorViewModel(Configuration.BadColor);
+
+                        _windowService.ShowDialogWindow<ColorWindow>(vm);
+                        Configuration.BadColor = vm.Color;
+                    }));
             }
         }
-        
+
         // ==== Deep (DINOv2) search ====
 
         ICommand _downloadLightGlueModelCommand;
+
         public ICommand DownloadLightGlueModelCommand =>
-            _downloadLightGlueModelCommand ??= new RelayCommand(_ => DownloadLightGlueModel(), _ => true);
+            _downloadLightGlueModelCommand ??=
+                new RelayCommand(_ => DownloadLightGlueModel(), _ => true);
 
         bool _isDownloadingLightGlue;
+
         public bool IsDownloadingLightGlue
         {
             get { return _isDownloadingLightGlue; }
-            set { _isDownloadingLightGlue = value; RaisePropertyChangedEvent(); }
+
+            set
+            {
+                _isDownloadingLightGlue = value;
+                RaisePropertyChangedEvent();
+            }
         }
 
         string _lightGlueDownloadStatus = "";
+
         public string LightGlueDownloadStatus
         {
             get { return _lightGlueDownloadStatus; }
-            set { _lightGlueDownloadStatus = value; RaisePropertyChangedEvent(); }
+
+            set
+            {
+                _lightGlueDownloadStatus = value;
+                RaisePropertyChangedEvent();
+            }
         }
 
-        /// <summary>Path to the SuperPoint+LightGlue model (empty = default folder).</summary>
+        /// <summary>
+        /// Path to the SuperPoint+LightGlue model (empty = default folder).
+        /// </summary>
         public string LightGlueModelPath
         {
             get { return Configuration.LightGlueModelPath; }
+
             set
             {
                 Configuration.LightGlueModelPath = value;
+
                 RaisePropertyChangedEvent();
                 RaisePropertyChangedEvent(nameof(LightGlueResolvedPath));
             }
         }
 
-        /// <summary>Path to the DINOv2-base model (empty = default folder; the file is placed manually).</summary>
+        /// <summary>
+        /// Path to the DINOv2-base model
+        /// (empty = default folder; the file is placed manually).
+        /// </summary>
         public string Dinov2ModelPath
         {
             get { return Configuration.Dinov2ModelPath; }
+
             set
             {
                 Configuration.Dinov2ModelPath = value;
+
                 RaisePropertyChangedEvent();
                 RaisePropertyChangedEvent(nameof(Dinov2ResolvedPath));
             }
         }
 
-        /// <summary>Models folder for deep search: &lt;UserPath&gt;\models.</summary>
+        /// <summary>
+        /// Models folder for deep search: <UserPath>\models.
+        /// </summary>
         private string DeepModelsDirectory =>
-            AntiDupl.NET.Deep.Infra.DeepModelManager.GetModelsDirectory(AntiDupl.NET.WPF.Resources.Resources.UserPath);
+            AntiDupl.NET.Deep.Infra.DeepModelManager.GetModelsDirectory(
+                AntiDupl.NET.WPF.Resources.Resources.UserPath);
 
-        /// <summary>CUDA toolkit bin directory (added to PATH at app start; restart required after change).</summary>
+        /// <summary>
+        /// CUDA toolkit bin directory.
+        /// </summary>
         public string CudaPath
         {
             get { return Configuration.CudaPath; }
+
             set
             {
                 Configuration.CudaPath = value;
@@ -198,10 +251,13 @@ namespace AntiDupl.NET.WPF.ViewModel
             }
         }
 
-        /// <summary>cuDNN bin directory (added to PATH at app start; restart required after change).</summary>
+        /// <summary>
+        /// cuDNN bin directory.
+        /// </summary>
         public string CudnnPath
         {
             get { return Configuration.CudnnPath; }
+
             set
             {
                 Configuration.CudnnPath = value;
@@ -209,26 +265,33 @@ namespace AntiDupl.NET.WPF.ViewModel
             }
         }
 
-        // ==== Параметры deep-пайплайна (текстовые поля; некорректный ввод игнорируется) ====
+        // ==== Deep pipeline parameters ====
 
-        /// <summary>Minimum pair similarity (0..1). Text form for the settings TextBox.</summary>
         public string DeepMinSimilarityText
         {
-            get { return Configuration.DeepMinSimilarityForPair.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture); }
+            get
+            {
+                return Configuration.DeepMinSimilarityForPair.ToString(
+                    "0.###",
+                    System.Globalization.CultureInfo.InvariantCulture);
+            }
+
             set
             {
                 if (TryParseDouble(value, out double v))
                 {
-                    Configuration.DeepMinSimilarityForPair = Math.Clamp(v, 0.0, 1.0);
+                    Configuration.DeepMinSimilarityForPair =
+                        Math.Clamp(v, 0.0, 1.0);
+
                     RaisePropertyChangedEvent();
                 }
             }
         }
 
-        /// <summary>Maximum cluster size (≥ 1). Text form for the settings TextBox.</summary>
         public string DeepMaxClusterSizeText
         {
             get { return Configuration.DeepMaxClusterSize.ToString(); }
+
             set
             {
                 if (int.TryParse(value, out int v) && v >= 1)
@@ -239,24 +302,31 @@ namespace AntiDupl.NET.WPF.ViewModel
             }
         }
 
-        /// <summary>Transitivity ratio (0..1, × distance threshold). Text form for the settings TextBox.</summary>
         public string DeepTransitivityRatioText
         {
-            get { return Configuration.DeepTransitivityRatio.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture); }
+            get
+            {
+                return Configuration.DeepTransitivityRatio.ToString(
+                    "0.###",
+                    System.Globalization.CultureInfo.InvariantCulture);
+            }
+
             set
             {
                 if (TryParseDouble(value, out double v))
                 {
-                    Configuration.DeepTransitivityRatio = Math.Clamp(v, 0.0, 1.0);
+                    Configuration.DeepTransitivityRatio =
+                        Math.Clamp(v, 0.0, 1.0);
+
                     RaisePropertyChangedEvent();
                 }
             }
         }
 
-        /// <summary>WGC parallelism (0 = auto). Text form for the settings TextBox.</summary>
         public string DeepWgcParallelismText
         {
             get { return Configuration.DeepWgcParallelism.ToString(); }
+
             set
             {
                 if (int.TryParse(value, out int v) && v >= 0)
@@ -267,24 +337,31 @@ namespace AntiDupl.NET.WPF.ViewModel
             }
         }
 
-        /// <summary>Minimum LightGlue match score (0..1). Text form for the settings TextBox.</summary>
         public string DeepMinMatchScoreText
         {
-            get { return Configuration.DeepMinMatchScore.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture); }
+            get
+            {
+                return Configuration.DeepMinMatchScore.ToString(
+                    "0.###",
+                    System.Globalization.CultureInfo.InvariantCulture);
+            }
+
             set
             {
                 if (TryParseDouble(value, out double v))
                 {
-                    Configuration.DeepMinMatchScore = Math.Clamp(v, 0.0, 1.0);
+                    Configuration.DeepMinMatchScore =
+                        Math.Clamp(v, 0.0, 1.0);
+
                     RaisePropertyChangedEvent();
                 }
             }
         }
 
-        /// <summary>DINOv2 inference batch size (≥ 1). Text form for the settings TextBox.</summary>
         public string DeepBatchSizeText
         {
             get { return Configuration.DeepBatchSize.ToString(); }
+
             set
             {
                 if (int.TryParse(value, out int v) && v >= 1)
@@ -295,10 +372,10 @@ namespace AntiDupl.NET.WPF.ViewModel
             }
         }
 
-        /// <summary>Prefetch queue depth (0 = off). Text form for the settings TextBox.</summary>
         public string DeepPrefetchCountText
         {
             get { return Configuration.DeepPrefetchCount.ToString(); }
+
             set
             {
                 if (int.TryParse(value, out int v) && v >= 0)
@@ -309,10 +386,10 @@ namespace AntiDupl.NET.WPF.ViewModel
             }
         }
 
-        /// <summary>Размер очереди отмены (Advanced, зеркало WF UndoQueueSize). Текстовая форма.</summary>
         public string UndoRedoStackSizeText
         {
             get { return Configuration.UndoRedoStackSize.ToString(); }
+
             set
             {
                 if (uint.TryParse(value, out uint v))
@@ -323,78 +400,132 @@ namespace AntiDupl.NET.WPF.ViewModel
             }
         }
 
-        /// <summary>Разбор числа из TextBox: допускает запятую как десятичный разделитель.</summary>
-        private static bool TryParseDouble(string? text, out double value)
+        private static bool TryParseDouble(
+            string? text,
+            out double value)
         {
             value = 0;
+
             if (string.IsNullOrWhiteSpace(text))
                 return false;
-            return double.TryParse(text.Replace(',', '.'),
-                System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out value);
+
+            return double.TryParse(
+                text.Replace(',', '.'),
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out value);
         }
 
-        /// <summary>Resolved DINOv2 model path (for display; hint if the file is missing).</summary>
+        /// <summary>
+        /// Resolved DINOv2 model path.
+        /// </summary>
         public string Dinov2ResolvedPath
         {
             get
             {
                 string modelsDir = DeepModelsDirectory;
-                string? path = AntiDupl.NET.Deep.Infra.DeepModelManager.ResolveDinov2Path(Dinov2ModelPath, modelsDir);
+
+                string? path =
+                    AntiDupl.NET.Deep.Infra.DeepModelManager.ResolveDinov2Path(
+                        Dinov2ModelPath,
+                        modelsDir);
+
                 if (path == null)
-                    return AntiDupl.NET.Deep.Infra.DeepModelManager.GetDefaultDinov2Path(modelsDir) +
-                           "  <not found: place the file manually (not downloadable)>";
+                {
+                    string defaultPath =
+                        AntiDupl.NET.Deep.Infra.DeepModelManager.GetDefaultDinov2Path(
+                            modelsDir);
+
+                    return LocalizationHelper.S(
+                        "configurationWindow_deepDinov2ModelNotFound",
+                        defaultPath);
+                }
+
                 return path;
             }
         }
 
-        /// <summary>Resolved LightGlue model path (default = models folder; downloaded by the button).</summary>
+        /// <summary>
+        /// Resolved LightGlue model path.
+        /// </summary>
         public string LightGlueResolvedPath =>
-            AntiDupl.NET.Deep.Infra.DeepModelManager.ResolveLightGluePath(LightGlueModelPath, DeepModelsDirectory);
+            AntiDupl.NET.Deep.Infra.DeepModelManager.ResolveLightGluePath(
+                LightGlueModelPath,
+                DeepModelsDirectory);
 
         /// <summary>
-        /// Downloads superpoint_lightglue_pipeline.onnx into the models folder
-        /// (background thread; status goes to LightGlueDownloadStatus).
-        /// dinov2-base.onnx is never downloaded.
+        /// Downloads the LightGlue model into the models folder.
         /// </summary>
         private void DownloadLightGlueModel()
         {
             if (_isDownloadingLightGlue)
                 return;
+
             _isDownloadingLightGlue = true;
             RaisePropertyChangedEvent(nameof(IsDownloadingLightGlue));
+
             LightGlueDownloadStatus = "";
+
             string target = LightGlueResolvedPath;
-            var dispatcher = System.Windows.Application.Current.Dispatcher;
+
+            var dispatcher =
+                System.Windows.Application.Current.Dispatcher;
+
             Task.Run(() =>
             {
                 if (System.IO.File.Exists(target))
                 {
                     dispatcher.Invoke(() =>
                     {
-                        LightGlueDownloadStatus = "Model is up to date: " + target;
+                        LightGlueDownloadStatus = LocalizationHelper.S(
+                            "configurationWindow_deepLightGlueModelUpToDate",
+                            target);
+
                         RaisePropertyChangedEvent(nameof(LightGlueResolvedPath));
                         RaisePropertyChangedEvent(nameof(Dinov2ResolvedPath));
                         RaisePropertyChangedEvent(nameof(Configuration));
                     });
+
                     _isDownloadingLightGlue = false;
                     RaisePropertyChangedEvent(nameof(IsDownloadingLightGlue));
+
                     return;
                 }
+
                 try
                 {
-                    var progress = new Progress<AntiDupl.NET.Deep.Models.DeepProgress>(
-                        p => dispatcher.Invoke(() => LightGlueDownloadStatus = "Downloading model... " + p.Status));
+                    var progress =
+                        new Progress<AntiDupl.NET.Deep.Models.DeepProgress>(
+                            p => dispatcher.Invoke(() =>
+                            {
+                                LightGlueDownloadStatus = LocalizationHelper.S(
+                                    "configurationWindow_deepLightGlueModelDownloading",
+                                    p.Status);
+                            }));
+
                     AntiDupl.NET.Deep.Infra.DeepModelManager.DownloadModel(
-                        AntiDupl.NET.Deep.Infra.DeepModelManager.LightGluePipelineUrl, target, _deepLogger, progress);
+                        AntiDupl.NET.Deep.Infra.DeepModelManager.LightGluePipelineUrl,
+                        target,
+                        _deepLogger,
+                        progress);
+
                     dispatcher.Invoke(() =>
                     {
-                        LightGlueDownloadStatus = "Model downloaded: " + target;
+                        LightGlueDownloadStatus = LocalizationHelper.S(
+                            "configurationWindow_deepLightGlueModelDownloaded",
+                            target);
+
                         RaisePropertyChangedEvent(nameof(LightGlueResolvedPath));
                     });
                 }
                 catch (System.Exception ex)
                 {
-                    dispatcher.Invoke(() => LightGlueDownloadStatus = "Model download failed: " + ex.Message);
+                    dispatcher.Invoke(() =>
+                    {
+                        LightGlueDownloadStatus = LocalizationHelper.S(
+                            "configurationWindow_deepLightGlueModelDownloadFailed",
+                            ex.Message);
+                    });
                 }
                 finally
                 {
@@ -404,78 +535,136 @@ namespace AntiDupl.NET.WPF.ViewModel
             });
         }
 
-        // ==== Скачивание модели DINOv2 (пользовательский URL; официальный файл не распространяется) ====
+        // ==== DINOv2 model download ====
 
         ICommand _downloadDinov2ModelCommand;
+
         public ICommand DownloadDinov2ModelCommand =>
-            _downloadDinov2ModelCommand ??= new RelayCommand(_ => DownloadDinov2Model(), _ => true);
+            _downloadDinov2ModelCommand ??=
+                new RelayCommand(_ => DownloadDinov2Model(), _ => true);
 
         bool _isDownloadingDinov2;
+
         public bool IsDownloadingDinov2
         {
             get { return _isDownloadingDinov2; }
-            set { _isDownloadingDinov2 = value; RaisePropertyChangedEvent(); }
+
+            set
+            {
+                _isDownloadingDinov2 = value;
+                RaisePropertyChangedEvent();
+            }
         }
 
         string _dinov2DownloadStatus;
+
         public string Dinov2DownloadStatus
         {
             get { return _dinov2DownloadStatus; }
-            set { _dinov2DownloadStatus = value; RaisePropertyChangedEvent(); }
+
+            set
+            {
+                _dinov2DownloadStatus = value;
+                RaisePropertyChangedEvent();
+            }
         }
 
-        /// <summary>URL скачивания модели DINOv2 (пусто = авто-скачивание при поиске отключено).</summary>
+        /// <summary>
+        /// DINOv2 model download URL.
+        /// </summary>
         public string Dinov2ModelUrl
         {
             get { return Configuration.Dinov2ModelUrl; }
-            set { Configuration.Dinov2ModelUrl = value; RaisePropertyChangedEvent(); }
+
+            set
+            {
+                Configuration.Dinov2ModelUrl = value;
+                RaisePropertyChangedEvent();
+            }
         }
 
         private void DownloadDinov2Model()
         {
             if (_isDownloadingDinov2)
                 return;
+
             string url = (Configuration.Dinov2ModelUrl ?? "").Trim();
+
             if (url.Length == 0)
             {
-                Dinov2DownloadStatus = "URL для скачивания не задан (Configuration → Deep).";
+                Dinov2DownloadStatus = LocalizationHelper.S(
+                    "configurationWindow_deepDinov2UrlMissing");
+
                 return;
             }
+
             _isDownloadingDinov2 = true;
             RaisePropertyChangedEvent(nameof(IsDownloadingDinov2));
+
             Dinov2DownloadStatus = "";
+
             string target = string.IsNullOrWhiteSpace(Dinov2ModelPath)
-                ? AntiDupl.NET.Deep.Infra.DeepModelManager.GetDefaultDinov2Path(DeepModelsDirectory)
+                ? AntiDupl.NET.Deep.Infra.DeepModelManager.GetDefaultDinov2Path(
+                    DeepModelsDirectory)
                 : Dinov2ModelPath;
-            var dispatcher = System.Windows.Application.Current.Dispatcher;
+
+            var dispatcher =
+                System.Windows.Application.Current.Dispatcher;
+
             Task.Run(() =>
             {
                 if (System.IO.File.Exists(target))
                 {
                     dispatcher.Invoke(() =>
                     {
-                        Dinov2DownloadStatus = "Модель актуальна: " + target;
+                        Dinov2DownloadStatus = LocalizationHelper.S(
+                            "configurationWindow_deepDinov2ModelUpToDate",
+                            target);
+
                         RaisePropertyChangedEvent(nameof(Dinov2ResolvedPath));
                         RaisePropertyChangedEvent(nameof(Configuration));
                     });
+
                     _isDownloadingDinov2 = false;
                     RaisePropertyChangedEvent(nameof(IsDownloadingDinov2));
+
                     return;
                 }
+
                 try
                 {
-                    var progress = new Progress<AntiDupl.NET.Deep.Models.DeepProgress>(
-                        p => dispatcher.Invoke(() => Dinov2DownloadStatus = "Скачивание модели... " + p.Status));
-                    AntiDupl.NET.Deep.Infra.DeepModelManager.DownloadModel(url, target, _deepLogger, progress);
+                    var progress =
+                        new Progress<AntiDupl.NET.Deep.Models.DeepProgress>(
+                            p => dispatcher.Invoke(() =>
+                            {
+                                Dinov2DownloadStatus = LocalizationHelper.S(
+                                    "configurationWindow_deepDinov2Downloading",
+                                    p.Status);
+                            }));
+
+                    AntiDupl.NET.Deep.Infra.DeepModelManager.DownloadModel(
+                        url,
+                        target,
+                        _deepLogger,
+                        progress);
+
                     dispatcher.Invoke(() =>
                     {
-                        Dinov2DownloadStatus = "Модель скачана: " + target;
+                        Dinov2DownloadStatus = LocalizationHelper.S(
+                            "configurationWindow_deepDinov2Downloaded",
+                            target);
+
                         RaisePropertyChangedEvent(nameof(Dinov2ResolvedPath));
                     });
                 }
                 catch (System.Exception ex)
                 {
-                    dispatcher.Invoke(() => Dinov2DownloadStatus = "Не удалось скачать модель: " + ex.Message);
+                    dispatcher.Invoke(() =>
+                    {
+                        Dinov2DownloadStatus = LocalizationHelper.S(
+                            "configurationWindow_deepDinov2DownloadFailed",
+                            ex.Message);
+                    });
                 }
                 finally
                 {
