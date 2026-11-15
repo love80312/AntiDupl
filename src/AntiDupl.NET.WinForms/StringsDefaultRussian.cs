@@ -33,7 +33,7 @@ namespace AntiDupl.NET.WinForms
         {
             s.Name = "Russian";
             s.OriginalLanguageName = "Русский";
-            
+
             s.OkButton_Text = "OK";
             s.CancelButton_Text = "Отмена";
             s.StopButton_Text = "Стоп";
@@ -231,7 +231,7 @@ namespace AntiDupl.NET.WinForms
             s.ResultsListView_Defect_Column_Text = "Тип дефекта";
             s.ResultsListView_Transform_Column_Text = "Трансформация";
             s.ResultsListView_Hint_Column_Text = "Рекомендация";
-            
+
             s.ResultsListView_FileName_Column_Text = "Имя";
             s.ResultsListView_FileDirectory_Column_Text = "В каталоге";
             s.ResultsListView_ImageSize_Column_Text = "Размеры";
@@ -294,6 +294,7 @@ namespace AntiDupl.NET.WinForms
             s.MainMenu_View_HotKeysMenuItem_Text = "Горячие клавиши";
             s.MainMenu_View_StretchSmallImagesMenuItem_Text = "Растягивать небольшие изображения";
             s.MainMenu_View_ProportionalImageSizeMenuItem_Text = "Пропорциональный размер картинок";
+            s.MainMenu_View_AlignImagesToDividerMenuItem_Text = "Выровнять изображения по разделителю";
             s.MainMenu_View_ShowNeighbourImageMenuItem_Text = "Показывать соседние изображения";
 
             s.MainMenu_SearchMenuItem_Text = "Поиск";
@@ -316,7 +317,7 @@ namespace AntiDupl.NET.WinForms
             s.MainMenu_NewVersionMenuItem_Tooltip = "AntiDupl.NET-{0} доступна на сайте!";
 
             s.SelectHotKeysForm_InvalidHotKeyToolTipText = "Эта комбинация клавиш уже используется для других целей.";
-            
+
             s.LanguageMenuItem_Text = "Язык";
 
             s.ViewModeMenuItem_Text = "Режим просмотра результатов";
