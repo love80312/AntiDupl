@@ -1,4 +1,4 @@
-/*
+﻿/*
 * AntiDupl.NET Program (http://ermig1979.github.io/AntiDupl).
 *
 * Copyright (c) 2002-2018 Yermalayeu Ihar, 2013-2018 Borisov Dmitry.
@@ -153,7 +153,8 @@ namespace AntiDupl.NET.WinForms
             s.CorePathsForm_AddFilesButton_Text = "Добавить файлы";
             s.CorePathsForm_ChangeButton_Text = "Изменить";
             s.CorePathsForm_RemoveButton_Text = "Убрать";
-            s.CorePathsForm_IgnoreFilenameFilter_Text = "Фильтр имен файлов (Regex):";
+            s.CorePathsForm_IgnoreFilenameFilter_Text = "Фильтр имен:";
+            s.CorePathsForm_IgnoreFilenameFilter_ToolTip_Text = "Введите регулярное выражение для фильтрации имен игнорируемых файлов.";
             s.CorePathsForm_SearchCheckedListBox_ToolTip_Text = "Установленный флажок означает поиск внутри поддиректорий указанной директории.";
 
             s.ProgressUtils_Completed = "завершено {0}%";
@@ -331,6 +332,7 @@ namespace AntiDupl.NET.WinForms
             s.ColorModeMenuItem_DarkMenuItem_Text = "Тёмная";
             s.ColorModeMenuItem_RestartMessage = "Тема изменится при следующем запуске программы.";
 
+            s.ImagePreviewContextMenu_ZoomPreview_Text = "Увеличение при наведении";
             s.ImagePreviewContextMenu_CopyPathItem_Text = "Скопировать путь";
             s.ImagePreviewContextMenu_CopyFileNameItem_Text = "Скопировать имя картинки";
             s.ImagePreviewContextMenu_OpenImageItem_Text = "Открыть картинку";

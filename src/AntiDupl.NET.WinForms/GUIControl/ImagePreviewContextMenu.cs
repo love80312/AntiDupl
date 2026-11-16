@@ -55,6 +55,8 @@ namespace AntiDupl.NET.WinForms
         private ToolStripMenuItem m_moveImageAndRenameToNeighbourItem;
         private ToolStripMenuItem m_moveGroupToNeighbourItem;
         private ToolStripMenuItem m_renameGroupAsNeighbourItem;
+        private ToolStripMenuItem m_zoomPreviewItem;
+        private ToolStripMenuItem[] m_zoomItems;
 
         
         public ImagePreviewContextMenu(CoreLib core, Options options, CoreOptions coreOptions, ImagePreviewPanel imagePreviewPanel, ResultsListView resultsListView)
@@ -87,14 +89,45 @@ namespace AntiDupl.NET.WinForms
             m_moveImageAndRenameToNeighbourItem = InitFactory.MenuItem.Create(null, null, new EventHandler(MoveAndRenameToNeighbour));
             m_moveGroupToNeighbourItem = InitFactory.MenuItem.Create(null, null, MoveGroupToNeighbour);
             m_renameGroupAsNeighbourItem = InitFactory.MenuItem.Create(null, null, RenameCurrentGroupAsNeighbour);
-            
+            m_zoomPreviewItem = new ToolStripMenuItem();
+            m_zoomItems = new ToolStripMenuItem[4];
+            int[] zoomValues = new int[] { 150, 200, 300, 400 };
+            for (int i = 0; i < zoomValues.Length; ++i)
+            {
+                int zoom = zoomValues[i];
+                m_zoomItems[i] = new ToolStripMenuItem(zoom.ToString() + "%");
+                m_zoomItems[i].Tag = zoom;
+                m_zoomItems[i].Click += OnZoomPercentClicked;
+                m_zoomPreviewItem.DropDownItems.Add(m_zoomItems[i]);
+            }
+
             Items.Add(new ToolStripSeparator());
         }
         
+        private void OnZoomPercentClicked(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = sender as ToolStripMenuItem;
+            if (item != null && item.Tag is int)
+                m_options.resultsOptions.HoverZoomPercent = (int)item.Tag;
+        }
+
         private void OnOpening(object sender, EventArgs e)
         {
             Items.Clear();
             
+            if (m_imagePreviewPanel.EnableHoverZoom)
+            {
+                int currentZoom = m_options.resultsOptions.HoverZoomPercent;
+                m_zoomPreviewItem.DropDownItems.Clear();
+                foreach (ToolStripMenuItem item in m_zoomItems)
+                {
+                    item.Checked = (int)item.Tag == currentZoom;
+                    m_zoomPreviewItem.DropDownItems.Add(item);
+                }
+                Items.Add(m_zoomPreviewItem);
+                Items.Add(new ToolStripSeparator());
+            }
+
             Items.Add(m_copyPathItem);
             Items.Add(m_copyFileNameItem);
             Items.Add(new ToolStripSeparator());
@@ -140,6 +173,7 @@ namespace AntiDupl.NET.WinForms
             m_moveImageAndRenameToNeighbourItem.Text = s.ImagePreviewContextMenu_MoveAndRenameImageToNeighbourItem_Text;
             m_moveGroupToNeighbourItem.Text = s.ImagePreviewContextMenu_MoveGroupToNeighbourItem_Text;
             m_renameGroupAsNeighbourItem.Text = s.ImagePreviewContextMenu_RenameGroupAsNeighbourItem_Text;
+            m_zoomPreviewItem.Text = s.ImagePreviewContextMenu_ZoomPreview_Text;
         }
 
         private void OpenImage(object sender, EventArgs e)

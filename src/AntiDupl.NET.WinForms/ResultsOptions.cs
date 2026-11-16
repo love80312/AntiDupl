@@ -1,4 +1,4 @@
-/*
+﻿/*
 * AntiDupl.NET Program (http://ermig1979.github.io/AntiDupl).
 *
 * Copyright (c) 2002-2018 Yermalayeu Ihar, 2013-2018 Borisov Dmitry.
@@ -281,6 +281,13 @@ namespace AntiDupl.NET.WinForms
         }
 
         private int m_penThickness = 2;
+        public int HoverZoomPercent
+        {
+            get { return m_hoverZoomPercent; }
+            set { m_hoverZoomPercent = value; }
+        }
+        private int m_hoverZoomPercent = 200;
+
         public int PenThickness
         {
             get
@@ -363,6 +370,7 @@ namespace AntiDupl.NET.WinForms
             m_proportionalImageSize = options.m_proportionalImageSize;
             m_alignImagesToDivider = options.m_alignImagesToDivider;
             m_showNeighboursImages = options.m_showNeighboursImages;
+            m_hoverZoomPercent = options.m_hoverZoomPercent;
 
             options.CopyHighlightTo(this);
         }
@@ -428,6 +436,8 @@ namespace AntiDupl.NET.WinForms
                 return false;
             if (thumbnailSizeMax != options.thumbnailSizeMax)
                 return false;
+            if (m_hoverZoomPercent != options.m_hoverZoomPercent)
+                return false;
 
             return true;
         }
@@ -443,6 +453,7 @@ namespace AntiDupl.NET.WinForms
             splitterDistanceHorizontalNormal = MainSplitContainer.VIEW_MIN_HEIGHT;
 
             thumbnailSizeMax = new System.Drawing.Size(DEFAULT_THUMBNAIL_WIDTH_MAX, DEFAULT_THUMBNAIL_HEIGHT_MAX);
+            m_hoverZoomPercent = 200;
 
             m_viewMode = ViewMode.VerticalPairTable;
 
@@ -452,6 +463,10 @@ namespace AntiDupl.NET.WinForms
 
         public void Check()
         {
+            if (m_hoverZoomPercent != 150 && m_hoverZoomPercent != 200 &&
+                m_hoverZoomPercent != 300 && m_hoverZoomPercent != 400)
+                m_hoverZoomPercent = 200;
+
             if (columnOptionsVertical.Length < (int)ResultsListView.ColumnsTypeVertical.Size ||
                 columnOptionsHorizontal.Length < (int)ResultsListView.ColumnsTypeHorizontal.Size)
             {

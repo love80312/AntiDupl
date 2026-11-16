@@ -1,4 +1,4 @@
-/*
+﻿/*
 * AntiDupl.NET Program (http://ermig1979.github.io/AntiDupl).
 *
 * Copyright (c) 2002-2018 Yermalayeu Ihar, 2013-2018 Borisov Dmitry.
@@ -157,6 +157,7 @@ namespace AntiDupl.NET.WinForms
         public string CorePathsForm_ChangeButton_Text;
         public string CorePathsForm_RemoveButton_Text;
         public string CorePathsForm_IgnoreFilenameFilter_Text;
+        public string CorePathsForm_IgnoreFilenameFilter_ToolTip_Text;
         public string CorePathsForm_SearchCheckedListBox_ToolTip_Text;
 
         public string ProgressUtils_Completed;
@@ -334,6 +335,7 @@ namespace AntiDupl.NET.WinForms
         public string ColorModeMenuItem_DarkMenuItem_Text;
         public string ColorModeMenuItem_RestartMessage;
 
+        public string ImagePreviewContextMenu_ZoomPreview_Text;
         public string ImagePreviewContextMenu_CopyPathItem_Text;
         public string ImagePreviewContextMenu_CopyFileNameItem_Text;
         public string ImagePreviewContextMenu_OpenImageItem_Text;

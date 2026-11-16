@@ -153,7 +153,8 @@ namespace AntiDupl.NET.WinForms
             s.CorePathsForm_AddFilesButton_Text = "Add Files";
             s.CorePathsForm_ChangeButton_Text = "Change";
             s.CorePathsForm_RemoveButton_Text = "Remove";
-            s.CorePathsForm_IgnoreFilenameFilter_Text = "Filename Filter (Regex):";
+            s.CorePathsForm_IgnoreFilenameFilter_Text = "Filename filter:";
+            s.CorePathsForm_IgnoreFilenameFilter_ToolTip_Text = "Enter a regular expression to filter ignored file names.";
             s.CorePathsForm_SearchCheckedListBox_ToolTip_Text = "Checked box mean search inside subdirectories this directories.";
 
             s.ProgressUtils_Completed = "{0}% completed";
@@ -331,6 +332,7 @@ namespace AntiDupl.NET.WinForms
             s.ColorModeMenuItem_DarkMenuItem_Text = "Dark";
             s.ColorModeMenuItem_RestartMessage = "The theme changes the next time the program starts.";
 
+            s.ImagePreviewContextMenu_ZoomPreview_Text = "Hover Zoom";
             s.ImagePreviewContextMenu_CopyPathItem_Text = "Copy path";
             s.ImagePreviewContextMenu_CopyFileNameItem_Text = "Copy image name";
             s.ImagePreviewContextMenu_OpenImageItem_Text = "Open image";

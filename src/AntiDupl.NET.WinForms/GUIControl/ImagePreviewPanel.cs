@@ -73,6 +73,7 @@ namespace AntiDupl.NET.WinForms
         public CoreImageInfo NeighbourImageInfo { get { return m_neighbourImageInfo; } }
         
         private PictureBoxPanel m_pictureBoxPanel;
+        public bool EnableHoverZoom { get { return m_pictureBoxPanel.EnableHoverZoom; } }
         private Label m_fileSizeLabel;
         private Label m_imageSizeLabel;
         private Label m_imageTypeLabel;
@@ -82,12 +83,13 @@ namespace AntiDupl.NET.WinForms
         private Label m_pathLabel;
         private ToolTip m_toolTip;
 
-        public ImagePreviewPanel(CoreLib core, Options options, ResultsListView resultsListView, Position position)
+        public ImagePreviewPanel(CoreLib core, Options options, ResultsListView resultsListView, Position position, bool enableHoverZoom = false)
         {
             m_core = core;
             m_options = options;
             m_resultsListView = resultsListView;
             InitializeComponents();
+            m_pictureBoxPanel.EnableHoverZoom = enableHoverZoom;
             SetPosition(position);
         }
         

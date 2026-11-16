@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Strings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Name>Traditional Chinese</Name>
   <OriginalLanguageName>正體中文</OriginalLanguageName>
@@ -99,7 +99,8 @@
   <CorePathsForm_AddFilesButton_Text>新增檔案</CorePathsForm_AddFilesButton_Text>
   <CorePathsForm_ChangeButton_Text>變更</CorePathsForm_ChangeButton_Text>
   <CorePathsForm_RemoveButton_Text>移除</CorePathsForm_RemoveButton_Text>
-  <CorePathsForm_IgnoreFilenameFilter_Text>檔名篩選（正規表達式）：</CorePathsForm_IgnoreFilenameFilter_Text>
+  <CorePathsForm_IgnoreFilenameFilter_Text>檔名篩選：</CorePathsForm_IgnoreFilenameFilter_Text>
+  <CorePathsForm_IgnoreFilenameFilter_ToolTip_Text>輸入正規表示式以篩選要忽略的檔名。</CorePathsForm_IgnoreFilenameFilter_ToolTip_Text>
   <CorePathsForm_SearchCheckedListBox_ToolTip_Text>勾選方塊表示在此目錄的子目錄中搜尋。</CorePathsForm_SearchCheckedListBox_ToolTip_Text>
   <ProgressUtils_Completed>已完成 {0}%</ProgressUtils_Completed>
   <ProgressUtils_5HoursRemaining>剩餘 {0} 小時</ProgressUtils_5HoursRemaining>
@@ -241,6 +242,7 @@
   <ViewModeMenuItem_VerticalPairTableMenuItem_Text>垂直配對表格</ViewModeMenuItem_VerticalPairTableMenuItem_Text>
   <ViewModeMenuItem_HorizontalPairTableMenuItem_Text>水平配對表格</ViewModeMenuItem_HorizontalPairTableMenuItem_Text>
   <ViewModeMenuItem_GroupedThumbnailsMenuItem_Text>群組縮圖</ViewModeMenuItem_GroupedThumbnailsMenuItem_Text>
+  <ImagePreviewContextMenu_ZoomPreview_Text>懸浮放大預覽</ImagePreviewContextMenu_ZoomPreview_Text>
   <ImagePreviewContextMenu_CopyPathItem_Text>複製路徑</ImagePreviewContextMenu_CopyPathItem_Text>
   <ImagePreviewContextMenu_CopyFileNameItem_Text>複製圖片名稱</ImagePreviewContextMenu_CopyFileNameItem_Text>
   <ImagePreviewContextMenu_OpenImageItem_Text>開啟圖片</ImagePreviewContextMenu_OpenImageItem_Text>

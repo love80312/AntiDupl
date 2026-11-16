@@ -1,4 +1,4 @@
-
+﻿
 /*
 * AntiDupl.NET Program (http://ermig1979.github.io/AntiDupl).
 *
@@ -135,7 +135,7 @@ namespace AntiDupl.NET.WinForms
             ignoreLayout.Controls.Add(ThemeColors.Framed(m_ignoreListBox), 0, 0);
 
             TableLayoutPanel filterLayout = InitFactory.Layout.Create(2, 1);
-            filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160F));
+            filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
             filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             filterLayout.Dock = DockStyle.Fill;
             ignoreLayout.Controls.Add(filterLayout, 0, 1);
@@ -236,6 +236,7 @@ namespace AntiDupl.NET.WinForms
             m_changeButton.Text = s.CorePathsForm_ChangeButton_Text;
             m_removeButton.Text = s.CorePathsForm_RemoveButton_Text;
             m_ignoreFilterLabel.Text = s.CorePathsForm_IgnoreFilenameFilter_Text;
+            m_toolTip.SetToolTip(m_ignoreFilterLabel, s.CorePathsForm_IgnoreFilenameFilter_ToolTip_Text);
         }
 
         /// <summary>

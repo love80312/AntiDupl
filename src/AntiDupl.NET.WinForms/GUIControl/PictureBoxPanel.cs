@@ -42,6 +42,21 @@ namespace AntiDupl.NET.WinForms
         private Options m_options;
         private CoreImageInfo m_currentImageInfo;
         private Size m_neighbourSizeMax;
+        private bool m_enableHoverZoom;
+        private Timer m_hoverZoomTimer;
+        private ImageZoomPreviewForm m_hoverZoomForm;
+        private Point m_hoverPoint;
+
+        public bool EnableHoverZoom
+        {
+            get { return m_enableHoverZoom; }
+            set
+            {
+                m_enableHoverZoom = value;
+                if (!value)
+                    HideHoverZoom();
+            }
+        }
 
         private Rectangle m_bitmapRect;
         private MemoryStream m_memoryStream;
@@ -92,6 +107,9 @@ namespace AntiDupl.NET.WinForms
             m_options = options;
             InitializeComponents();
             m_options.resultsOptions.OnImageViewChange += new ResultsOptions.ImageViewChangeHandler(OnImageViewChange);
+            m_hoverZoomTimer = new Timer();
+            m_hoverZoomTimer.Interval = 350;
+            m_hoverZoomTimer.Tick += OnHoverZoomTimerTick;
         }
 
         private void InitializeComponents()
@@ -108,6 +126,7 @@ namespace AntiDupl.NET.WinForms
 
         public void UpdateImage(CoreImageInfo currentImageInfo)
         {
+            HideHoverZoom();
             if (m_originalBitmap != null)
             {
                 m_originalBitmap.Dispose();
@@ -199,6 +218,79 @@ namespace AntiDupl.NET.WinForms
             ImageAnimator.StopAnimate(m_bitmap, new EventHandler(OnFrameChanged));
         }
 
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            if (!m_enableHoverZoom || Bitmap == null || !m_bitmapRect.Contains(e.Location))
+            {
+                HideHoverZoom();
+                return;
+            }
+
+            m_hoverPoint = e.Location;
+            if (m_hoverZoomForm != null && m_hoverZoomForm.Visible)
+                UpdateHoverZoom();
+            else if (!m_hoverZoomTimer.Enabled)
+                m_hoverZoomTimer.Start();
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+            HideHoverZoom();
+        }
+
+        private void OnHoverZoomTimerTick(object sender, EventArgs e)
+        {
+            m_hoverZoomTimer.Stop();
+            UpdateHoverZoom();
+        }
+
+        private void UpdateHoverZoom()
+        {
+            Bitmap source = Bitmap;
+            if (!m_enableHoverZoom || source == null || !m_bitmapRect.Contains(m_hoverPoint))
+            {
+                HideHoverZoom();
+                return;
+            }
+            if (m_hoverZoomForm == null || m_hoverZoomForm.IsDisposed)
+                m_hoverZoomForm = new ImageZoomPreviewForm();
+            m_hoverZoomForm.UpdatePreview(source, m_bitmapRect, m_hoverPoint,
+                m_options.resultsOptions.HoverZoomPercent, PointToScreen(m_hoverPoint));
+        }
+
+        private void HideHoverZoom()
+        {
+            if (m_hoverZoomTimer != null)
+                m_hoverZoomTimer.Stop();
+            if (m_hoverZoomForm != null && !m_hoverZoomForm.IsDisposed)
+            {
+                m_hoverZoomForm.Hide();
+                m_hoverZoomForm.ClearPreview();
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (m_hoverZoomTimer != null)
+                {
+                    m_hoverZoomTimer.Stop();
+                    m_hoverZoomTimer.Dispose();
+                    m_hoverZoomTimer = null;
+                }
+                if (m_hoverZoomForm != null)
+                {
+                    m_hoverZoomForm.Close();
+                    m_hoverZoomForm.Dispose();
+                    m_hoverZoomForm = null;
+                }
+            }
+            base.Dispose(disposing);
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             if (m_animationEnable)
@@ -238,6 +330,7 @@ namespace AntiDupl.NET.WinForms
 
         private void OnSizeChanged(object sender, EventArgs e)
         {
+            HideHoverZoom();
             UpdateImagePadding(m_neighbourSizeMax);
             if (m_options.resultsOptions.ShowNeighboursImages)
                 ShowNeighboursImages(false);
@@ -246,6 +339,7 @@ namespace AntiDupl.NET.WinForms
 
         private void OnImageViewChange()
         {
+            HideHoverZoom();
             UpdateImagePadding(m_neighbourSizeMax);
             if (m_options.resultsOptions.ShowNeighboursImages)
                 ShowNeighboursImages(true);
@@ -430,6 +524,7 @@ namespace AntiDupl.NET.WinForms
         /// </summary>
         public bool SetDifference(List<Rectangle> rectanglesOfDifferenceIn)
         {
+            HideHoverZoom();
             if (!m_animationEnable)
             {
                 if (m_originalBitmap == null)
@@ -475,6 +570,7 @@ namespace AntiDupl.NET.WinForms
 
         public void ClearDifference()
         {
+            HideHoverZoom();
             if (m_originalBitmap != null)
             {
                 m_bitmap = m_originalBitmap.Clone() as Bitmap;

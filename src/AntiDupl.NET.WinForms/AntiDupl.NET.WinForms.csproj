@@ -78,6 +78,7 @@
     <Compile Update="GUIControl\ComplexProgressBar.cs" />
     <Compile Update="GUIControl\ImagePreviewContextMenu.cs" />
     <Compile Update="GUIControl\ImagePreviewPanel.cs" />
+    <Compile Update="GUIControl\ImageZoomPreviewForm.cs" />
     <Compile Update="GUIControl\LabeledComboBox.cs" />
     <Compile Update="GUIControl\LabeledIntegerEdit.cs" />
     <Compile Update="GUIControl\LabeledNumericUpDown.cs" />
