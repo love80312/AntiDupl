@@ -4,7 +4,7 @@ name: AntiDupl Personal Build
 on:
   push:
     branches:
-      - as
+      - a_float
   workflow_dispatch:
 
 permissions:
