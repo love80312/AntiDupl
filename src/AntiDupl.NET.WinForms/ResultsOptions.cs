@@ -1,4 +1,4 @@
-﻿/*
+/*
 * AntiDupl.NET Program (http://ermig1979.github.io/AntiDupl).
 *
 * Copyright (c) 2002-2018 Yermalayeu Ihar, 2013-2018 Borisov Dmitry.
@@ -412,6 +412,7 @@ namespace AntiDupl.NET.WinForms
             options.splitterDistanceHorizontalMaximized = splitterDistanceHorizontalMaximized;
             options.splitterDistanceHorizontalNormal = splitterDistanceHorizontalNormal;
             options.thumbnailSizeMax = thumbnailSizeMax;
+            options.m_hoverZoomPercent = m_hoverZoomPercent;
         }
 
         public bool Equals(ResultsOptions options)
