@@ -36,15 +36,13 @@ jobs:
 
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v3
-
-      - name: Restore NuGet packages
-        run: nuget restore $env:Solution_Name
+        with:
+          msbuild-architecture: x64
 
       - name: Run and cache vcpkg dependencies
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgGitCommitId: 3b9d086009cc1c2256e9c28ad44a00036fbd9b26
-          vcpkgJsonGlob: src/vcpkg.json
           runVcpkgInstall: false
 
       - name: Integrate vcpkg
