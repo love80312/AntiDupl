@@ -8,6 +8,9 @@ namespace AntiDupl.NET.WinForms
     /// <summary>Displays a magnified crop of the image currently under the mouse.</summary>
     internal sealed class ImageZoomPreviewForm : Form
     {
+        private const int WM_NCHITTEST = 0x0084;
+        private static readonly IntPtr HTTRANSPARENT = new IntPtr(-1);
+
         private Bitmap m_image;
         private Rectangle m_sourceRectangle;
 
@@ -35,11 +38,30 @@ namespace AntiDupl.NET.WinForms
             }
         }
 
+        /// <summary>
+        /// Lets the window underneath receive hit testing, so the magnifier does not
+        /// trigger MouseLeave on the PictureBoxPanel being magnified.
+        /// </summary>
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_NCHITTEST)
+            {
+                m.Result = HTTRANSPARENT;
+                return;
+            }
+
+            base.WndProc(ref m);
+        }
+
         public void UpdatePreview(Bitmap image, Rectangle imageBounds, Point imagePoint, int zoomPercent, Point cursorScreenPosition)
         {
             if (image == null || image.Width <= 0 || image.Height <= 0 ||
                 imageBounds.Width <= 0 || imageBounds.Height <= 0)
                 return;
+
+            if (zoomPercent != 150 && zoomPercent != 200 &&
+                zoomPercent != 300 && zoomPercent != 400)
+                zoomPercent = 200;
 
             m_image = image;
             double scale = Math.Max(1.0, zoomPercent / 100.0);
