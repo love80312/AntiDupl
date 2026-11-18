@@ -108,8 +108,8 @@ namespace AntiDupl.NET.WinForms
             InitializeComponents();
             m_options.resultsOptions.OnImageViewChange += new ResultsOptions.ImageViewChangeHandler(OnImageViewChange);
             m_hoverZoomTimer = new Timer();
-            m_hoverZoomTimer.Interval = 350;
             m_hoverZoomTimer.Tick += OnHoverZoomTimerTick;
+            m_options.OnChange += new Options.ChangeHandler(OnOptionsChanged);
         }
 
         private void InitializeComponents()
@@ -221,7 +221,8 @@ namespace AntiDupl.NET.WinForms
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            if (!m_enableHoverZoom || Bitmap == null || !m_bitmapRect.Contains(e.Location))
+            if (!m_enableHoverZoom || !m_options.resultsOptions.HoverZoomEnabled ||
+                Bitmap == null || !m_bitmapRect.Contains(e.Location))
             {
                 HideHoverZoom();
                 return;
@@ -229,9 +230,29 @@ namespace AntiDupl.NET.WinForms
 
             m_hoverPoint = e.Location;
             if (m_hoverZoomForm != null && m_hoverZoomForm.Visible)
-                UpdateHoverZoom();
-            else if (!m_hoverZoomTimer.Enabled)
-                m_hoverZoomTimer.Start();
+            {
+                // Limit repainting to roughly 30 frames per second while the
+                // pointer moves, rather than redrawing on every MouseMove event.
+                if (!m_hoverZoomTimer.Enabled)
+                {
+                    m_hoverZoomTimer.Interval = 33;
+                    m_hoverZoomTimer.Start();
+                }
+            }
+            else
+            {
+                int delay = m_options.resultsOptions.HoverZoomDelay;
+                if (delay <= 0)
+                    UpdateHoverZoom();
+                else
+                {
+                    // Reset the delay while the pointer is still moving. The
+                    // preview appears after the pointer settles over the image.
+                    m_hoverZoomTimer.Stop();
+                    m_hoverZoomTimer.Interval = delay;
+                    m_hoverZoomTimer.Start();
+                }
+            }
         }
 
         protected override void OnMouseLeave(EventArgs e)
@@ -249,7 +270,8 @@ namespace AntiDupl.NET.WinForms
         private void UpdateHoverZoom()
         {
             Bitmap source = Bitmap;
-            if (!m_enableHoverZoom || source == null || !m_bitmapRect.Contains(m_hoverPoint))
+            if (!m_enableHoverZoom || !m_options.resultsOptions.HoverZoomEnabled ||
+                source == null || !m_bitmapRect.Contains(m_hoverPoint))
             {
                 HideHoverZoom();
                 return;
@@ -257,7 +279,16 @@ namespace AntiDupl.NET.WinForms
             if (m_hoverZoomForm == null || m_hoverZoomForm.IsDisposed)
                 m_hoverZoomForm = new ImageZoomPreviewForm();
             m_hoverZoomForm.UpdatePreview(source, m_bitmapRect, m_hoverPoint,
-                m_options.resultsOptions.HoverZoomPercent, PointToScreen(m_hoverPoint));
+                m_options.resultsOptions.HoverZoomPercent,
+                m_options.resultsOptions.HoverZoomWidth,
+                m_options.resultsOptions.HoverZoomHeight,
+                PointToScreen(m_hoverPoint));
+        }
+
+        private void OnOptionsChanged()
+        {
+            if (!m_options.resultsOptions.HoverZoomEnabled)
+                HideHoverZoom();
         }
 
         private void HideHoverZoom()
@@ -275,6 +306,7 @@ namespace AntiDupl.NET.WinForms
         {
             if (disposing)
             {
+                m_options.OnChange -= new Options.ChangeHandler(OnOptionsChanged);
                 if (m_hoverZoomTimer != null)
                 {
                     m_hoverZoomTimer.Stop();

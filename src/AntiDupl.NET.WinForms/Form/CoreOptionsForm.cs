@@ -33,7 +33,7 @@ using AntiDupl.NET.Core.Enums;
 
 namespace AntiDupl.NET.WinForms
 {
-    public class CoreOptionsForm : Form
+    public partial class CoreOptionsForm : Form
     {
         static public int THRESHOLD_DIFFERENCE_MAX_SQUARED_SUM = 15;
         static public int THRESHOLD_DIFFERENCE_MAX_SSIM = 50;
@@ -252,6 +252,8 @@ namespace AntiDupl.NET.WinForms
             InitilizeHighlightTabPage();
 
             InitilizeImageDiffTabPage();
+
+            InitilizeImagePreviewOptionsTabPage();
 
             TableLayoutPanel mainButtonsTableLayoutPanel = InitFactory.Layout.Create(4, 1);
             mainButtonsTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
@@ -860,6 +862,8 @@ namespace AntiDupl.NET.WinForms
             m_imageDiffExecutableArgumentsLabeledStringEdit.Text = s.CoreOptionsForm_ImageDiffExecutableArgumentsLabeledStringEdit_Text;
             m_imageDiff2ExecutablePathLabeledStringEdit.Text = s.CoreOptionsForm_ImageDiff2ExecutablePathLabeledStringEdit_Text;
             m_imageDiff2ExecutableArgumentsLabeledStringEdit.Text = s.CoreOptionsForm_ImageDiff2ExecutableArgumentsLabeledStringEdit_Text;
+
+            UpdateImagePreviewOptionStrings(s);
         }
 
         /// <summary>
@@ -899,7 +903,8 @@ namespace AntiDupl.NET.WinForms
             }
 
             m_okButton.Enabled = !m_oldCoreOptions.Equals(m_newCoreOptions);
-            m_setDefaultButton.Enabled = !m_defaultCoreOptions.Equals(m_newCoreOptions);
+            m_setDefaultButton.Enabled = !m_defaultCoreOptions.Equals(m_newCoreOptions) ||
+                (m_hoverZoomEnabledCheckBox != null && !AreImagePreviewOptionsDefault());
 
             m_transformedImageCheckBox.Enabled = m_newCoreOptions.compareOptions.checkOnEquality;
             // Only these two have it: local colour's differences aren't the
@@ -958,6 +963,7 @@ namespace AntiDupl.NET.WinForms
 
         private void OnOkButtonClick(object sender, EventArgs e)
         {
+            ApplyImagePreviewOptions();
             SetOptions();
             m_newCoreOptions.CopyTo(ref m_oldCoreOptions);
             m_oldCoreOptions.Validate(m_core, m_options.onePath);
@@ -992,6 +998,7 @@ namespace AntiDupl.NET.WinForms
             GetOptions();
             m_inited = true;
             UpdateItemsEnabling();
+            ResetImagePreviewOptions();
         }
     }
 }

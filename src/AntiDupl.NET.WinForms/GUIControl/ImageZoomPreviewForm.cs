@@ -16,13 +16,14 @@ namespace AntiDupl.NET.WinForms
 
         public ImageZoomPreviewForm()
         {
-            FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            // A borderless, non-activating window leaves the full area for the image.
+            FormBorderStyle = FormBorderStyle.None;
             ShowInTaskbar = false;
             TopMost = true;
             StartPosition = FormStartPosition.Manual;
-            Size = new Size(264, 204);
+            ClientSize = new Size(480, 360);
             BackColor = Color.Black;
-            Padding = new Padding(2);
+            Padding = new Padding(1);
             DoubleBuffered = true;
         }
 
@@ -53,15 +54,23 @@ namespace AntiDupl.NET.WinForms
             base.WndProc(ref m);
         }
 
-        public void UpdatePreview(Bitmap image, Rectangle imageBounds, Point imagePoint, int zoomPercent, Point cursorScreenPosition)
+        public void UpdatePreview(Bitmap image, Rectangle imageBounds, Point imagePoint,
+            int zoomPercent, int previewWidth, int previewHeight, Point cursorScreenPosition)
         {
             if (image == null || image.Width <= 0 || image.Height <= 0 ||
                 imageBounds.Width <= 0 || imageBounds.Height <= 0)
                 return;
 
             if (zoomPercent != 150 && zoomPercent != 200 &&
-                zoomPercent != 300 && zoomPercent != 400)
+                zoomPercent != 300 && zoomPercent != 400 &&
+                zoomPercent != 600)
                 zoomPercent = 200;
+
+            Rectangle workingArea = Screen.FromPoint(cursorScreenPosition).WorkingArea;
+            previewWidth = Math.Max(240, Math.Min(previewWidth, Math.Max(240, workingArea.Width - 16)));
+            previewHeight = Math.Max(180, Math.Min(previewHeight, Math.Max(180, workingArea.Height - 16)));
+            if (ClientSize.Width != previewWidth || ClientSize.Height != previewHeight)
+                ClientSize = new Size(previewWidth, previewHeight);
 
             m_image = image;
             double scale = Math.Max(1.0, zoomPercent / 100.0);
@@ -117,7 +126,7 @@ namespace AntiDupl.NET.WinForms
                 e.Graphics.DrawImage(m_image, destination, m_sourceRectangle, GraphicsUnit.Pixel);
             }
             using (Pen border = new Pen(Color.White))
-                e.Graphics.DrawRectangle(border, 0, 0, Width - 1, Height - 1);
+                e.Graphics.DrawRectangle(border, 0, 0, ClientSize.Width - 1, ClientSize.Height - 1);
         }
     }
 }

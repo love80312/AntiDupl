@@ -67,6 +67,12 @@ namespace AntiDupl.NET.WinForms
         public string StartFinishForm_ClearTemporary_Text;
 
         public string CoreOptionsForm_Text;
+        public string CoreOptionsForm_ImagePreviewTabPage_Text;
+        public string CoreOptionsForm_HoverZoomEnabledCheckBox_Text;
+        public string CoreOptionsForm_HoverZoomPercent_Text;
+        public string CoreOptionsForm_HoverZoomWidth_Text;
+        public string CoreOptionsForm_HoverZoomHeight_Text;
+        public string CoreOptionsForm_HoverZoomDelay_Text;
 
         public string CoreOptionsForm_SearchTabPage_Text;
         public string CoreOptionsForm_SearchFileTypeGroupBox_Text;

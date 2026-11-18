@@ -22,6 +22,12 @@
   <StartFinishForm_SaveResults_Text>儲存結果檔案</StartFinishForm_SaveResults_Text>
   <StartFinishForm_ClearTemporary_Text>刪除暫存檔案</StartFinishForm_ClearTemporary_Text>
   <CoreOptionsForm_Text>選項</CoreOptionsForm_Text>
+  <CoreOptionsForm_ImagePreviewTabPage_Text>圖片預覽</CoreOptionsForm_ImagePreviewTabPage_Text>
+  <CoreOptionsForm_HoverZoomEnabledCheckBox_Text>啟用滑鼠懸浮放大預覽</CoreOptionsForm_HoverZoomEnabledCheckBox_Text>
+  <CoreOptionsForm_HoverZoomPercent_Text>放大倍率：</CoreOptionsForm_HoverZoomPercent_Text>
+  <CoreOptionsForm_HoverZoomWidth_Text>預覽寬度（像素）：</CoreOptionsForm_HoverZoomWidth_Text>
+  <CoreOptionsForm_HoverZoomHeight_Text>預覽高度（像素）：</CoreOptionsForm_HoverZoomHeight_Text>
+  <CoreOptionsForm_HoverZoomDelay_Text>滑鼠停留延遲：</CoreOptionsForm_HoverZoomDelay_Text>
   <CoreOptionsForm_SearchTabPage_Text>搜尋</CoreOptionsForm_SearchTabPage_Text>
   <CoreOptionsForm_SearchFileTypeGroupBox_Text>搜尋類型：</CoreOptionsForm_SearchFileTypeGroupBox_Text>
   <CoreOptionsForm_BmpCheckBox_Text>BMP</CoreOptionsForm_BmpCheckBox_Text>

@@ -288,6 +288,34 @@ namespace AntiDupl.NET.WinForms
         }
         private int m_hoverZoomPercent = 200;
 
+        private bool m_hoverZoomEnabled = true;
+        public bool HoverZoomEnabled
+        {
+            get { return m_hoverZoomEnabled; }
+            set { m_hoverZoomEnabled = value; }
+        }
+
+        private int m_hoverZoomWidth = 480;
+        public int HoverZoomWidth
+        {
+            get { return m_hoverZoomWidth; }
+            set { m_hoverZoomWidth = value; }
+        }
+
+        private int m_hoverZoomHeight = 360;
+        public int HoverZoomHeight
+        {
+            get { return m_hoverZoomHeight; }
+            set { m_hoverZoomHeight = value; }
+        }
+
+        private int m_hoverZoomDelay = 350;
+        public int HoverZoomDelay
+        {
+            get { return m_hoverZoomDelay; }
+            set { m_hoverZoomDelay = value; }
+        }
+
         public int PenThickness
         {
             get
@@ -371,6 +399,10 @@ namespace AntiDupl.NET.WinForms
             m_alignImagesToDivider = options.m_alignImagesToDivider;
             m_showNeighboursImages = options.m_showNeighboursImages;
             m_hoverZoomPercent = options.m_hoverZoomPercent;
+            m_hoverZoomEnabled = options.m_hoverZoomEnabled;
+            m_hoverZoomWidth = options.m_hoverZoomWidth;
+            m_hoverZoomHeight = options.m_hoverZoomHeight;
+            m_hoverZoomDelay = options.m_hoverZoomDelay;
 
             options.CopyHighlightTo(this);
         }
@@ -413,6 +445,10 @@ namespace AntiDupl.NET.WinForms
             options.splitterDistanceHorizontalNormal = splitterDistanceHorizontalNormal;
             options.thumbnailSizeMax = thumbnailSizeMax;
             options.m_hoverZoomPercent = m_hoverZoomPercent;
+            options.m_hoverZoomEnabled = m_hoverZoomEnabled;
+            options.m_hoverZoomWidth = m_hoverZoomWidth;
+            options.m_hoverZoomHeight = m_hoverZoomHeight;
+            options.m_hoverZoomDelay = m_hoverZoomDelay;
         }
 
         public bool Equals(ResultsOptions options)
@@ -439,6 +475,14 @@ namespace AntiDupl.NET.WinForms
                 return false;
             if (m_hoverZoomPercent != options.m_hoverZoomPercent)
                 return false;
+            if (m_hoverZoomEnabled != options.m_hoverZoomEnabled)
+                return false;
+            if (m_hoverZoomWidth != options.m_hoverZoomWidth)
+                return false;
+            if (m_hoverZoomHeight != options.m_hoverZoomHeight)
+                return false;
+            if (m_hoverZoomDelay != options.m_hoverZoomDelay)
+                return false;
 
             return true;
         }
@@ -455,6 +499,10 @@ namespace AntiDupl.NET.WinForms
 
             thumbnailSizeMax = new System.Drawing.Size(DEFAULT_THUMBNAIL_WIDTH_MAX, DEFAULT_THUMBNAIL_HEIGHT_MAX);
             m_hoverZoomPercent = 200;
+            m_hoverZoomEnabled = true;
+            m_hoverZoomWidth = 480;
+            m_hoverZoomHeight = 360;
+            m_hoverZoomDelay = 350;
 
             m_viewMode = ViewMode.VerticalPairTable;
 
@@ -465,8 +513,18 @@ namespace AntiDupl.NET.WinForms
         public void Check()
         {
             if (m_hoverZoomPercent != 150 && m_hoverZoomPercent != 200 &&
-                m_hoverZoomPercent != 300 && m_hoverZoomPercent != 400)
+                m_hoverZoomPercent != 300 && m_hoverZoomPercent != 400 &&
+                m_hoverZoomPercent != 600)
                 m_hoverZoomPercent = 200;
+
+            if (m_hoverZoomWidth < 240 || m_hoverZoomWidth > 1200)
+                m_hoverZoomWidth = 480;
+            if (m_hoverZoomHeight < 180 || m_hoverZoomHeight > 900)
+                m_hoverZoomHeight = 360;
+            if (m_hoverZoomDelay != 0 && m_hoverZoomDelay != 100 &&
+                m_hoverZoomDelay != 200 && m_hoverZoomDelay != 350 &&
+                m_hoverZoomDelay != 500)
+                m_hoverZoomDelay = 350;
 
             if (columnOptionsVertical.Length < (int)ResultsListView.ColumnsTypeVertical.Size ||
                 columnOptionsHorizontal.Length < (int)ResultsListView.ColumnsTypeHorizontal.Size)

@@ -64,6 +64,12 @@ namespace AntiDupl.NET.WinForms
             s.StartFinishForm_ClearTemporary_Text = "Delete temporary files";
 
             s.CoreOptionsForm_Text = "Options";
+            s.CoreOptionsForm_ImagePreviewTabPage_Text = "Image preview";
+            s.CoreOptionsForm_HoverZoomEnabledCheckBox_Text = "Enable floating zoom preview";
+            s.CoreOptionsForm_HoverZoomPercent_Text = "Magnification:";
+            s.CoreOptionsForm_HoverZoomWidth_Text = "Preview width (pixels):";
+            s.CoreOptionsForm_HoverZoomHeight_Text = "Preview height (pixels):";
+            s.CoreOptionsForm_HoverZoomDelay_Text = "Hover delay:";
 
             s.CoreOptionsForm_SearchTabPage_Text = "Search";
             s.CoreOptionsForm_SearchFileTypeGroupBox_Text = "Search types:";
