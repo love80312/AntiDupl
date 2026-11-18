@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows.Forms;
 
 namespace AntiDupl.NET.WinForms
@@ -16,7 +16,8 @@ namespace AntiDupl.NET.WinForms
         private Label m_hoverZoomDelayLabel;
         private ComboBox m_hoverZoomDelayComboBox;
 
-        private static readonly int[] HOVER_ZOOM_PERCENT_VALUES = new int[] { 150, 200, 300, 400, 600 };
+        // Values are percentages of the image's actual on-screen display scale.
+        private static readonly int[] HOVER_ZOOM_PERCENT_VALUES = new int[] { 100, 150, 200, 300, 400, 600, 800 };
         private static readonly int[] HOVER_ZOOM_DELAY_VALUES = new int[] { 0, 100, 200, 350, 500 };
 
         private void InitilizeImagePreviewOptionsTabPage()
@@ -30,8 +31,8 @@ namespace AntiDupl.NET.WinForms
             layout.Padding = new Padding(12);
             layout.ColumnCount = 2;
             layout.RowCount = 5;
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44F));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 56F));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 52F));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 48F));
             for (int i = 0; i < 5; ++i)
                 layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             m_imagePreviewSettingsTabPage.Controls.Add(layout);
@@ -48,10 +49,12 @@ namespace AntiDupl.NET.WinForms
             m_hoverZoomPercentComboBox = new ComboBox();
             m_hoverZoomPercentComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             m_hoverZoomPercentComboBox.Width = 150;
+            m_hoverZoomPercentComboBox.Margin = new Padding(3);
+            m_hoverZoomPercentComboBox.Anchor = AnchorStyles.Left;
             foreach (int value in HOVER_ZOOM_PERCENT_VALUES)
                 m_hoverZoomPercentComboBox.Items.Add(value.ToString() + "%");
             m_hoverZoomPercentComboBox.SelectedIndex = FindImagePreviewOptionIndex(
-                HOVER_ZOOM_PERCENT_VALUES, m_options.resultsOptions.HoverZoomPercent, 1);
+                HOVER_ZOOM_PERCENT_VALUES, m_options.resultsOptions.HoverZoomPercent, 2);
             m_hoverZoomPercentComboBox.SelectedIndexChanged += OnImagePreviewOptionChanged;
             layout.Controls.Add(m_hoverZoomPercentComboBox, 1, 1);
 
@@ -62,6 +65,8 @@ namespace AntiDupl.NET.WinForms
             m_hoverZoomWidthNumericUpDown.Maximum = 1200;
             m_hoverZoomWidthNumericUpDown.Increment = 40;
             m_hoverZoomWidthNumericUpDown.Width = 150;
+            m_hoverZoomWidthNumericUpDown.Margin = new Padding(3);
+            m_hoverZoomWidthNumericUpDown.Anchor = AnchorStyles.Left;
             m_hoverZoomWidthNumericUpDown.Value = m_options.resultsOptions.HoverZoomWidth;
             m_hoverZoomWidthNumericUpDown.ValueChanged += OnImagePreviewOptionChanged;
             layout.Controls.Add(m_hoverZoomWidthNumericUpDown, 1, 2);
@@ -73,6 +78,8 @@ namespace AntiDupl.NET.WinForms
             m_hoverZoomHeightNumericUpDown.Maximum = 900;
             m_hoverZoomHeightNumericUpDown.Increment = 30;
             m_hoverZoomHeightNumericUpDown.Width = 150;
+            m_hoverZoomHeightNumericUpDown.Margin = new Padding(3);
+            m_hoverZoomHeightNumericUpDown.Anchor = AnchorStyles.Left;
             m_hoverZoomHeightNumericUpDown.Value = m_options.resultsOptions.HoverZoomHeight;
             m_hoverZoomHeightNumericUpDown.ValueChanged += OnImagePreviewOptionChanged;
             layout.Controls.Add(m_hoverZoomHeightNumericUpDown, 1, 3);
@@ -82,6 +89,8 @@ namespace AntiDupl.NET.WinForms
             m_hoverZoomDelayComboBox = new ComboBox();
             m_hoverZoomDelayComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             m_hoverZoomDelayComboBox.Width = 150;
+            m_hoverZoomDelayComboBox.Margin = new Padding(3);
+            m_hoverZoomDelayComboBox.Anchor = AnchorStyles.Left;
             string[] delayLabels = new string[] { "0 ms", "100 ms", "200 ms", "350 ms", "500 ms" };
             foreach (string label in delayLabels)
                 m_hoverZoomDelayComboBox.Items.Add(label);
@@ -96,8 +105,9 @@ namespace AntiDupl.NET.WinForms
         private static Label CreateImagePreviewOptionLabel()
         {
             Label label = new Label();
-            label.AutoSize = true;
-            label.Anchor = AnchorStyles.Left;
+            label.AutoSize = false;
+            label.Dock = DockStyle.Fill;
+            label.Margin = new Padding(3);
             label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             return label;
         }
@@ -147,7 +157,7 @@ namespace AntiDupl.NET.WinForms
         private bool AreImagePreviewOptionsDefault()
         {
             return m_hoverZoomEnabledCheckBox.Checked &&
-                m_hoverZoomPercentComboBox.SelectedIndex == 1 &&
+                m_hoverZoomPercentComboBox.SelectedIndex == 2 &&
                 m_hoverZoomWidthNumericUpDown.Value == 480 &&
                 m_hoverZoomHeightNumericUpDown.Value == 360 &&
                 m_hoverZoomDelayComboBox.SelectedIndex == 3;
@@ -175,7 +185,7 @@ namespace AntiDupl.NET.WinForms
         private void ResetImagePreviewOptions()
         {
             m_hoverZoomEnabledCheckBox.Checked = true;
-            m_hoverZoomPercentComboBox.SelectedIndex = 1;
+            m_hoverZoomPercentComboBox.SelectedIndex = 2;
             m_hoverZoomWidthNumericUpDown.Value = 480;
             m_hoverZoomHeightNumericUpDown.Value = 360;
             m_hoverZoomDelayComboBox.SelectedIndex = 3;

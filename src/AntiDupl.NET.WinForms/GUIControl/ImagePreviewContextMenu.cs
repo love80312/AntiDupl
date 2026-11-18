@@ -90,8 +90,8 @@ namespace AntiDupl.NET.WinForms
             m_moveGroupToNeighbourItem = InitFactory.MenuItem.Create(null, null, MoveGroupToNeighbour);
             m_renameGroupAsNeighbourItem = InitFactory.MenuItem.Create(null, null, RenameCurrentGroupAsNeighbour);
             m_zoomPreviewItem = new ToolStripMenuItem();
-            m_zoomItems = new ToolStripMenuItem[5];
-            int[] zoomValues = new int[] { 150, 200, 300, 400, 600 };
+            m_zoomItems = new ToolStripMenuItem[7];
+            int[] zoomValues = new int[] { 100, 150, 200, 300, 400, 600, 800 };
             for (int i = 0; i < zoomValues.Length; ++i)
             {
                 int zoom = zoomValues[i];

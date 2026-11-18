@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -13,6 +13,7 @@ namespace AntiDupl.NET.WinForms
 
         private Bitmap m_image;
         private Rectangle m_sourceRectangle;
+        private RectangleF m_destinationRectangle;
 
         public ImageZoomPreviewForm()
         {
@@ -61,9 +62,9 @@ namespace AntiDupl.NET.WinForms
                 imageBounds.Width <= 0 || imageBounds.Height <= 0)
                 return;
 
-            if (zoomPercent != 150 && zoomPercent != 200 &&
-                zoomPercent != 300 && zoomPercent != 400 &&
-                zoomPercent != 600)
+            if (zoomPercent != 100 && zoomPercent != 150 && zoomPercent != 200 &&
+                zoomPercent != 300 && zoomPercent != 400 && zoomPercent != 600 &&
+                zoomPercent != 800)
                 zoomPercent = 200;
 
             Rectangle workingArea = Screen.FromPoint(cursorScreenPosition).WorkingArea;
@@ -72,20 +73,59 @@ namespace AntiDupl.NET.WinForms
             if (ClientSize.Width != previewWidth || ClientSize.Height != previewHeight)
                 ClientSize = new Size(previewWidth, previewHeight);
 
-            m_image = image;
-            double scale = Math.Max(1.0, zoomPercent / 100.0);
-            int viewWidth = Math.Max(1, ClientSize.Width - Padding.Horizontal);
-            int viewHeight = Math.Max(1, ClientSize.Height - Padding.Vertical);
-            int sourceWidth = Math.Max(1, (int)Math.Round(viewWidth * image.Width / (double)imageBounds.Width / scale));
-            int sourceHeight = Math.Max(1, (int)Math.Round(viewHeight * image.Height / (double)imageBounds.Height / scale));
-            sourceWidth = Math.Min(sourceWidth, image.Width);
-            sourceHeight = Math.Min(sourceHeight, image.Height);
+            Rectangle view = new Rectangle(Padding.Left, Padding.Top,
+                Math.Max(1, ClientSize.Width - Padding.Horizontal),
+                Math.Max(1, ClientSize.Height - Padding.Vertical));
 
-            int centerX = (int)Math.Round((imagePoint.X - imageBounds.Left) * image.Width / (double)imageBounds.Width);
-            int centerY = (int)Math.Round((imagePoint.Y - imageBounds.Top) * image.Height / (double)imageBounds.Height);
-            int left = Math.Max(0, Math.Min(image.Width - sourceWidth, centerX - sourceWidth / 2));
-            int top = Math.Max(0, Math.Min(image.Height - sourceHeight, centerY - sourceHeight / 2));
+            // Derive the scale of the source image in the main preview. Use one
+            // uniform scale so the floating preview always preserves the image's
+            // natural aspect ratio, even when the main panel uses non-proportional fit.
+            double scaleX = imageBounds.Width / (double)image.Width;
+            double scaleY = imageBounds.Height / (double)image.Height;
+            double displayedPixelScale = Math.Min(scaleX, scaleY);
+            if (displayedPixelScale <= 0.0 || double.IsNaN(displayedPixelScale) ||
+                double.IsInfinity(displayedPixelScale))
+                return;
+
+            double requestedScale = displayedPixelScale * zoomPercent / 100.0;
+            if (requestedScale <= 0.0 || double.IsNaN(requestedScale) ||
+                double.IsInfinity(requestedScale))
+                return;
+
+            // The preview viewport is only a canvas. Fit the crop to it without
+            // stretching: if the bitmap is too small to fill the canvas at the
+            // selected magnification, show the whole available image with black
+            // margins instead of silently increasing the effective zoom.
+            double cropFraction = Math.Min(1.0,
+                Math.Min(view.Width / (requestedScale * image.Width),
+                         view.Height / (requestedScale * image.Height)));
+            int sourceWidth = Math.Max(1, Math.Min(image.Width,
+                (int)Math.Round(image.Width * cropFraction)));
+            int sourceHeight = Math.Max(1, Math.Min(image.Height,
+                (int)Math.Round(image.Height * cropFraction)));
+
+            int centerX = (int)Math.Round((imagePoint.X - imageBounds.Left) *
+                image.Width / (double)imageBounds.Width);
+            int centerY = (int)Math.Round((imagePoint.Y - imageBounds.Top) *
+                image.Height / (double)imageBounds.Height);
+            centerX = Math.Max(0, Math.Min(image.Width - 1, centerX));
+            centerY = Math.Max(0, Math.Min(image.Height - 1, centerY));
+
+            int left = Math.Max(0, Math.Min(image.Width - sourceWidth,
+                centerX - sourceWidth / 2));
+            int top = Math.Max(0, Math.Min(image.Height - sourceHeight,
+                centerY - sourceHeight / 2));
             m_sourceRectangle = new Rectangle(left, top, sourceWidth, sourceHeight);
+
+            float drawWidth = (float)(sourceWidth * requestedScale);
+            float drawHeight = (float)(sourceHeight * requestedScale);
+            // Guard against sub-pixel rounding pushing the image beyond the canvas.
+            drawWidth = Math.Min(drawWidth, view.Width);
+            drawHeight = Math.Min(drawHeight, view.Height);
+            float drawX = view.Left + (view.Width - drawWidth) / 2.0F;
+            float drawY = view.Top + (view.Height - drawHeight) / 2.0F;
+            m_destinationRectangle = new RectangleF(drawX, drawY, drawWidth, drawHeight);
+            m_image = image;
 
             PositionNearCursor(cursorScreenPosition);
             Invalidate();
@@ -97,6 +137,7 @@ namespace AntiDupl.NET.WinForms
         {
             m_image = null;
             m_sourceRectangle = Rectangle.Empty;
+            m_destinationRectangle = RectangleF.Empty;
         }
 
         private void PositionNearCursor(Point cursor)
@@ -117,13 +158,18 @@ namespace AntiDupl.NET.WinForms
         {
             base.OnPaint(e);
             e.Graphics.Clear(Color.Black);
-            if (m_image != null && m_sourceRectangle.Width > 0 && m_sourceRectangle.Height > 0)
+            if (m_image != null && m_sourceRectangle.Width > 0 &&
+                m_sourceRectangle.Height > 0 && m_destinationRectangle.Width > 0.0F &&
+                m_destinationRectangle.Height > 0.0F)
             {
-                Rectangle destination = new Rectangle(Padding.Left, Padding.Top,
-                    ClientSize.Width - Padding.Horizontal, ClientSize.Height - Padding.Vertical);
-                e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                e.Graphics.DrawImage(m_image, destination, m_sourceRectangle, GraphicsUnit.Pixel);
+                Rectangle destination = Rectangle.Round(m_destinationRectangle);
+                if (destination.Width > 0 && destination.Height > 0)
+                {
+                    e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                    e.Graphics.DrawImage(m_image, destination,
+                        m_sourceRectangle, GraphicsUnit.Pixel);
+                }
             }
             using (Pen border = new Pen(Color.White))
                 e.Graphics.DrawRectangle(border, 0, 0, ClientSize.Width - 1, ClientSize.Height - 1);

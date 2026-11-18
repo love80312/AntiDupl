@@ -1,4 +1,4 @@
-/*
+﻿/*
 * AntiDupl.NET Program (http://ermig1979.github.io/AntiDupl).
 *
 * Copyright (c) 2002-2018 Yermalayeu Ihar, 2013-2018 Borisov Dmitry.
@@ -512,9 +512,10 @@ namespace AntiDupl.NET.WinForms
 
         public void Check()
         {
-            if (m_hoverZoomPercent != 150 && m_hoverZoomPercent != 200 &&
-                m_hoverZoomPercent != 300 && m_hoverZoomPercent != 400 &&
-                m_hoverZoomPercent != 600)
+            if (m_hoverZoomPercent != 100 && m_hoverZoomPercent != 150 &&
+                m_hoverZoomPercent != 200 && m_hoverZoomPercent != 300 &&
+                m_hoverZoomPercent != 400 && m_hoverZoomPercent != 600 &&
+                m_hoverZoomPercent != 800)
                 m_hoverZoomPercent = 200;
 
             if (m_hoverZoomWidth < 240 || m_hoverZoomWidth > 1200)
